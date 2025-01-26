@@ -1,0 +1,147 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\1.0\\MainZ80_orig_x64\\vs\\Specy\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{B049BA6D-0EBE-4DA9-B0D0-4F738682688C}|Specy.vcxproj|C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\1.0\\MainZ80_orig_x64\\opcodesimpl_x86.inc||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B049BA6D-0EBE-4DA9-B0D0-4F738682688C}|Specy.vcxproj|C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\1.0\\MainZ80_orig_x64\\opcodesimpl_x64.inc||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B049BA6D-0EBE-4DA9-B0D0-4F738682688C}|Specy.vcxproj|C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\1.0\\MainZ80_orig_x64\\cpu.asm||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B049BA6D-0EBE-4DA9-B0D0-4F738682688C}|Specy.vcxproj|C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\1.0\\MainZ80_orig_x64\\cpuregs.inc||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B049BA6D-0EBE-4DA9-B0D0-4F738682688C}|Specy.vcxproj|C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\1.0\\MainZ80_orig_x64\\io.inc||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B049BA6D-0EBE-4DA9-B0D0-4F738682688C}|Specy.vcxproj|C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\1.0\\MainZ80_orig_x64\\Macros.inc||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B049BA6D-0EBE-4DA9-B0D0-4F738682688C}|Specy.vcxproj|C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\1.0\\MainZ80_orig_x64\\bitops_x64.inc||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B049BA6D-0EBE-4DA9-B0D0-4F738682688C}|Specy.vcxproj|C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\1.0\\MainZ80_orig_x64\\dirs_x64.inc||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 6,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "cpu.asm",
+              "DocumentMoniker": "C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\1.0\\MainZ80_orig_x64\\cpu.asm",
+              "RelativeDocumentMoniker": "..\\..\\cpu.asm",
+              "ToolTip": "C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\1.0\\MainZ80_orig_x64\\cpu.asm*",
+              "RelativeToolTip": "..\\..\\cpu.asm*",
+              "ViewState": "AgIAAJEHAAAAAAAAAAASwJoHAAAgAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-01-17T02:20:01.307Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "io.inc",
+              "DocumentMoniker": "C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\1.0\\MainZ80_orig_x64\\io.inc",
+              "RelativeDocumentMoniker": "..\\..\\io.inc",
+              "ToolTip": "C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\1.0\\MainZ80_orig_x64\\io.inc",
+              "RelativeToolTip": "..\\..\\io.inc",
+              "ViewState": "AgIAAFUAAAAAAAAAAAAqwEoAAAAPAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-01-26T16:09:15.916Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "Macros.inc",
+              "DocumentMoniker": "C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\1.0\\MainZ80_orig_x64\\Macros.inc",
+              "RelativeDocumentMoniker": "..\\..\\Macros.inc",
+              "ToolTip": "C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\1.0\\MainZ80_orig_x64\\Macros.inc",
+              "RelativeToolTip": "..\\..\\Macros.inc",
+              "ViewState": "AgIAACUAAAAAAAAAAAASwC4AAAARAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-01-20T16:51:38.581Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "bitops_x64.inc",
+              "DocumentMoniker": "C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\1.0\\MainZ80_orig_x64\\bitops_x64.inc",
+              "RelativeDocumentMoniker": "..\\..\\bitops_x64.inc",
+              "ToolTip": "C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\1.0\\MainZ80_orig_x64\\bitops_x64.inc",
+              "RelativeToolTip": "..\\..\\bitops_x64.inc",
+              "ViewState": "AgIAAA0AAAAAAAAAAAAqwBQAAAAWAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-01-18T20:29:22.45Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "dirs_x64.inc",
+              "DocumentMoniker": "C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\1.0\\MainZ80_orig_x64\\dirs_x64.inc",
+              "RelativeDocumentMoniker": "..\\..\\dirs_x64.inc",
+              "ToolTip": "C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\1.0\\MainZ80_orig_x64\\dirs_x64.inc",
+              "RelativeToolTip": "..\\..\\dirs_x64.inc",
+              "ViewState": "AgIAADYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-01-18T19:01:06.864Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "cpuregs.inc",
+              "DocumentMoniker": "C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\1.0\\MainZ80_orig_x64\\cpuregs.inc",
+              "RelativeDocumentMoniker": "..\\..\\cpuregs.inc",
+              "ToolTip": "C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\1.0\\MainZ80_orig_x64\\cpuregs.inc",
+              "RelativeToolTip": "..\\..\\cpuregs.inc",
+              "ViewState": "AgIAAGkAAAAAAAAAAAASwK4AAAAEAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-01-18T17:21:23.953Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "opcodesimpl_x86.inc",
+              "DocumentMoniker": "C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\1.0\\MainZ80_orig_x64\\opcodesimpl_x86.inc",
+              "RelativeDocumentMoniker": "..\\..\\opcodesimpl_x86.inc",
+              "ToolTip": "C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\1.0\\MainZ80_orig_x64\\opcodesimpl_x86.inc",
+              "RelativeToolTip": "..\\..\\opcodesimpl_x86.inc",
+              "ViewState": "AgIAAH4CAAAAAAAAAAAiwJACAAADAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-01-18T18:54:24.076Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "opcodesimpl_x64.inc",
+              "DocumentMoniker": "C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\1.0\\MainZ80_orig_x64\\opcodesimpl_x64.inc",
+              "RelativeDocumentMoniker": "..\\..\\opcodesimpl_x64.inc",
+              "ToolTip": "C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\1.0\\MainZ80_orig_x64\\opcodesimpl_x64.inc",
+              "RelativeToolTip": "..\\..\\opcodesimpl_x64.inc",
+              "ViewState": "AgIAAA8DAAAAAAAAAAAiwBoDAAAKAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-01-17T02:18:26.116Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
