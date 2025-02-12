@@ -64,6 +64,7 @@ memPtr BYTE_PTR 0
 include ..\..\opcodesdef.inc  
 
 .code
+
 		IFDEF rax
 			mov reg_pc, rcx
 		ELSE
@@ -1275,9 +1276,7 @@ Z80Loop:
 			jmp Z80Loop	
        OpD9:
 			;D9		EXX			4	1	1			
-			invoke Inst_EX,OFFSET RegBC_ESP,OFFSET RegBC
-			invoke Inst_EX,OFFSET RegDE_ESP,OFFSET RegDE
-			invoke Inst_EX,OFFSET RegHL_ESP,OFFSET RegHL			
+			invoke Inst_EXX			
 			EmulateOpcodeTime 4,1
 			jmp Z80Loop
        OpDA:
@@ -1403,6 +1402,7 @@ Z80Loop:
 	   OpED40:
 			  ;ED40  IN  B,(C)	12	3
 			  invoke INST_IN, RegBC, OFFSET RegB
+			  SetIOFlags RegB
 			  EmulateOpcodeTime 12,3
 			  jmp Z80Loop
        OpED41:
@@ -1436,8 +1436,7 @@ Z80Loop:
 			  jmp Z80Loop
        OpED46:
 			  ;ED46		IM 0 8 2
-			  mov al,0
-			  mov IMF,al
+			  mov IMF,0
 			  EmulateOpcodeTime 8,2
 			 jmp Z80Loop	 
        OpED47:
@@ -1448,6 +1447,7 @@ Z80Loop:
        OpED48:
 			  ;ED48  IN  C,(C)	12	3
 			  invoke INST_IN, RegBC, OFFSET RegC
+			  SetIOFlags RegC
 			  EmulateOpcodeTime 12,3
 			  jmp Z80Loop
        OpED49:
@@ -1480,8 +1480,7 @@ Z80Loop:
 			  jmp Z80Loop
        OpED4E:
 			 ;ED46E		IM 0 8 2
-			  mov al,0
-			  mov IMF,al
+			  mov IMF,0
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop
        OpED4F:
@@ -1492,6 +1491,7 @@ Z80Loop:
        OpED50:
 			  ;ED50  IN  D,(C)	12	3
 			  invoke INST_IN, RegBC, OFFSET RegD
+			  SetIOFlags RegD
 			  EmulateOpcodeTime 12,3
 			  jmp Z80Loop
        OpED51:
@@ -1525,19 +1525,19 @@ Z80Loop:
 			  jmp Z80Loop
        OpED56:
 			  ;ED56		IM 1 8 2
-			  mov al,1
-			  mov IMF,al
+			  mov IMF,1
 			  EmulateOpcodeTime 8,2
 			 jmp Z80Loop	
        OpED57:
 			  ;ED57		LD A,I 9 2 
 			  invoke Inst_LD8,OFFSET RegI,OFFSET RegA
-			  invoke SetFlagIR	
+			  invoke LD_SetFlagIR, OFFSET RegI
 			  EmulateOpcodeTime 9,2	  
 			  jmp Z80Loop 
        OpED58:
 			  ;ED58  IN  E,(C)	12	3
 			  invoke INST_IN, RegBC, OFFSET RegE
+			  SetIOFlags RegE
 			  EmulateOpcodeTime 12,3
 			  jmp Z80Loop
        OpED59:			  
@@ -1572,19 +1572,19 @@ Z80Loop:
 			  jmp Z80Loop
        OpED5E:
 			 ;ED5E		IM 2 8 2
-			 mov al,2
-			 mov IMF,al
+			 mov IMF,2
 			 EmulateOpcodeTime 8,2
 			 jmp Z80Loop	
        OpED5F:
 			  ;ED5F		LD A,R 9 2 
 			  invoke Inst_LD8,OFFSET RegR,OFFSET RegA
-			  invoke SetFlagIR
+			  invoke LD_SetFlagIR, OFFSET RegR
 			  EmulateOpcodeTime 9,2		  
 			  jmp Z80Loop 
        OpED60:
 			  ;ED60  IN  H,(C)	12	3
 			  invoke INST_IN, RegBC, OFFSET RegH
+			  SetIOFlags RegH
 			  EmulateOpcodeTime 12,3
 			  jmp Z80Loop
        OpED61:
@@ -1618,8 +1618,7 @@ Z80Loop:
 			  jmp Z80Loop       
        OpED66:
 			 ;ED66		IM 0 8 2
-			  mov al,0
-			  mov IMF,al
+			  mov IMF,0
 			  EmulateOpcodeTime 8,2
 			 jmp Z80Loop	
        OpED67:
@@ -1630,6 +1629,7 @@ Z80Loop:
        OpED68:
 			  ;ED68  IN  L,(C)	12	3
 			  invoke INST_IN, RegBC, OFFSET RegL
+			  SetIOFlags RegL
 			  EmulateOpcodeTime 12,3
 			  jmp Z80Loop
        OpED69:
@@ -1663,8 +1663,7 @@ Z80Loop:
 			  jmp Z80Loop
        OpED6E:
 			  ;ED6E		IM 0 8 2
-			  mov al,0
-			  mov IMF,al
+			  mov IMF,0
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop
        OpED6F:
@@ -1675,6 +1674,7 @@ Z80Loop:
        OpED70:
 			  ;ED70  IN  F,(C)	12	3
 			  invoke INST_IN, RegBC, OFFSET RegF
+			  SetIOFlags RegF
 			  EmulateOpcodeTime 12,3
 			  jmp Z80Loop
        OpED71:
@@ -1708,13 +1708,13 @@ Z80Loop:
 			  jmp Z80Loop
        OpED76:
 			  ;ED76		IM 1 8 2
-			  mov al,1
-			  mov IMF,al
+			  mov IMF,1
 			  EmulateOpcodeTime 8,2
 			 jmp Z80Loop
        OpED78:
 			  ;ED78  IN  A,(C)	12	3
 			  invoke INST_IN, RegBC, OFFSET RegA
+			  SetIOFlags RegA
 			  EmulateOpcodeTime 12,3
 			  jmp Z80Loop	
        OpED79:
@@ -1749,8 +1749,7 @@ Z80Loop:
 			  jmp Z80Loop
        OpED7E:
 			  ;ED7E		IM 2 8 2
-			  mov al,2
-			  mov IMF,al
+			  mov IMF,2
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop
        OpEDA0:
@@ -1764,15 +1763,13 @@ Z80Loop:
 			  EmulateOpcodeTime 16,4
 			  jmp Z80Loop	
        OpEDA2:
-			  ;EDA2		INI	16	4
-			  invoke DIR_REGISTRO_INDIRECTO, memPtr, RegHL
-			  invoke INST_INI, RegC, reg_di		  
+			  ;EDA2		INI	16	4			 
+			  invoke INST_INI, memPtr
 			  EmulateOpcodeTime 16,4
 			  jmp Z80Loop
        OpEDA3:
 			  ;EDA3		OUTI	16	4
-			  invoke DIR_REGISTRO_INDIRECTO, memPtr, RegHL
-			  invoke INST_OUTI, RegC, BYTE PTR [reg_di]			  
+			  invoke INST_OUTI, memPtr			  
 			  EmulateOpcodeTime 16,4
 			  jmp Z80Loop
        OpEDA8:
@@ -1786,56 +1783,54 @@ Z80Loop:
 			  EmulateOpcodeTime 16,4
 			  jmp Z80Loop
        OpEDAA:
-			  ;EDAA		IND	16	4	
-			  invoke DIR_REGISTRO_INDIRECTO, memPtr, RegHL
-			  invoke INST_IND, RegC, reg_di			  
+			  ;EDAA		IND	16	4
+			  invoke INST_IND, memPtr		  
 			  EmulateOpcodeTime 16,4
 			  jmp Z80Loop
        OpEDAB:
-			  ;EDAB		OUTD	16	4	
-			  invoke DIR_REGISTRO_INDIRECTO, memPtr, RegHL
-			  invoke INST_OUTD, RegC, BYTE PTR [reg_di]			  
+			  ;EDAB		OUTD	16	4
+			  invoke INST_OUTD, memPtr	  
 			  EmulateOpcodeTime 16,4
 			  jmp Z80Loop
        OpEDB0:
 			  ;EDB0		LDIR		BC != 0 ? 21 5 : 16 4	  
 			  invoke Inst_LDIR, memPtr
+			  EmulateOpcodeTime 16,4
 			  jmp Z80Loop
        OpEDB1:
 			  ;EDB1		CPIR
 			  invoke Inst_CPIR, memPtr
+			  EmulateOpcodeTime 16,4
 			  jmp Z80Loop
        OpEDB2:
 			  ;EDB2		INIR	21/16 	4/3
-			  invoke DIR_REGISTRO_INDIRECTO, memPtr, RegHL
-			  invoke INST_INIR, memPtr, RegC, reg_di		  
-			  EmulateOpcodeTime 21,4
+			  invoke INST_INIR, memPtr		  
+			  EmulateOpcodeTime 16,4
 			  jmp Z80Loop
        OpEDB3:
 			  ;EDB3		OTIR	21/16 	4/3
-			  invoke DIR_REGISTRO_INDIRECTO, memPtr, RegHL
-			  invoke INST_OTIR, memPtr, RegC, BYTE PTR [reg_di]			  
+			  invoke INST_OTIR, memPtr		  
 			  EmulateOpcodeTime 21,4
 			  jmp Z80Loop
        OpEDB8:
 			  ;EDB8		LDDR
 			  invoke Inst_LDDR, memPtr
+			  EmulateOpcodeTime 16,4
 			  jmp Z80Loop
        OpEDB9:
 			  ;EDB9		CPDR
 			  invoke Inst_CPDR, memPtr
+			  EmulateOpcodeTime 16,4
 			  jmp Z80Loop
        OpEDBA:
 			  ;EDBB		INDR	21/16	4/3
-			  invoke DIR_REGISTRO_INDIRECTO, memPtr, RegHL
-			  invoke INST_INDR, memPtr, RegC, reg_di		  
-			  EmulateOpcodeTime 21,4
+			  invoke INST_INDR, memPtr	  
+			  EmulateOpcodeTime 16,4
 			  jmp Z80Loop
        OpEDBB:			 
 			  ;EDBB		OTDR	21/16	4/3
-			  invoke DIR_REGISTRO_INDIRECTO, memPtr, RegHL
-			  invoke INST_OTDR, memPtr, RegC, BYTE PTR [reg_di]			  
-			  EmulateOpcodeTime 21,4
+			  invoke INST_OTDR, memPtr			  
+			  EmulateOpcodeTime 16,4
 			  jmp Z80Loop
        OpEE:
 			;EE n		XOR n 7 2
@@ -1916,9 +1911,8 @@ Z80Loop:
 			jmp Z80Loop
        OpFB:
 			;FB		EI 4 1
-			mov al,1
-	        mov IFF1,al
-			mov IFF2,al			
+	        mov IFF1,1
+			mov IFF2,1			
 			EmulateOpcodeTime 4,1
 			jmp Z80Loop
        OpFC:
@@ -2641,749 +2635,749 @@ Z80Loop:
 
        OpCB80:
 			  ;CB80		RES 0,B			8	2	2
-			  invoke UnSetBit,OFFSET RegB,0
+			  invoke Inst_RES,OFFSET RegB,0
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop
        OpCB81:
 			  ;CB81		RES 0,C			8	2	2
-			  invoke UnSetBit,OFFSET RegC,0
+			  invoke Inst_RES,OFFSET RegC,0
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop
 
        OpCB82:
 			  ;CB82		RES 0,D			8	2	2
-			  invoke UnSetBit,OFFSET RegD,0
+			  invoke Inst_RES,OFFSET RegD,0
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop
 
        OpCB83:
 			  ;CB83		RES 0,E			8	2	2
-			  invoke UnSetBit,OFFSET RegE,0
+			  invoke Inst_RES,OFFSET RegE,0
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop	
        OpCB84:
 			  ;CB84	 	RES 0,H			8	2	2
-			  invoke UnSetBit,OFFSET RegH,0
+			  invoke Inst_RES,OFFSET RegH,0
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop 		
        OpCB85:
 			  ;CB85	 	RES 0,L			8	2	2
-			  invoke UnSetBit,OFFSET RegL,0
+			  invoke Inst_RES,OFFSET RegL,0
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop	
        OpCB86:
 			 ;CB86	 	RES 0,(HL)		15	4	2
 			  invoke DIR_REGISTRO_INDIRECTO,memPtr,RegHL
-			  invoke UnSetBit,reg_di,0
+			  invoke Inst_RES,reg_di,0
 			  EmulateOpcodeTime 15,4
 			  jmp Z80Loop
        OpCB87:
 			  ;CB87	 	RES 0,A			8	2	2
-			  invoke UnSetBit,OFFSET RegA,0
+			  invoke Inst_RES,OFFSET RegA,0
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop	
        OpCB88:
 			  ;CB88		RES 1,B			8	2	2
-		      invoke UnSetBit,OFFSET RegB,1
+		      invoke Inst_RES,OFFSET RegB,1
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop 		
        OpCB89:
 			  ;CB89	 	RES 1,C			8	2	2
-			  invoke UnSetBit,OFFSET RegC,1
+			  invoke Inst_RES,OFFSET RegC,1
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop
        OpCB8A:
 			  ;CB8A	 	RES 1,D			8	2	2
-			  invoke UnSetBit,OFFSET RegD,1
+			  invoke Inst_RES,OFFSET RegD,1
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop 		
 
        OpCB8B:
 			 ;CB8B	 	RES 1,E			8	2	2
-			 invoke UnSetBit,OFFSET RegE,1
+			 invoke Inst_RES,OFFSET RegE,1
 			 EmulateOpcodeTime 8,2
 			 jmp Z80Loop
 
        OpCB8C:
 			  ;CB8C	 	RES 1,H			8	2	2
-			  invoke UnSetBit,OFFSET RegH,1
+			  invoke Inst_RES,OFFSET RegH,1
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop
 
        OpCB8D:
 			  ;CB8D	 	RES 1,L			8	2	2
-			  invoke UnSetBit,OFFSET RegL,1
+			  invoke Inst_RES,OFFSET RegL,1
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop
 
        OpCB8E:
 			 ;CB8E	 	RES 1,(HL)		15	4	2
 			  invoke DIR_REGISTRO_INDIRECTO,memPtr,RegHL
-			  invoke UnSetBit,reg_di,1
+			  invoke Inst_RES,reg_di,1
 			  EmulateOpcodeTime 15,4
 			  jmp Z80Loop
 
        OpCB8F:
 			  ;CB8F	 	RES 1,A			8	2	2
-			  invoke UnSetBit,OFFSET RegA,1
+			  invoke Inst_RES,OFFSET RegA,1
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop
        OpCB90:
 			  ;CB90		RES 2,B			8	2	2
-			  invoke UnSetBit,OFFSET RegB,2
+			  invoke Inst_RES,OFFSET RegB,2
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop
 
        OpCB91:
 			  ;CB91	 	RES 2,C			8	2	2
-			  invoke UnSetBit,OFFSET RegC,2
+			  invoke Inst_RES,OFFSET RegC,2
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop	
 
        OpCB92:
 			 ;CB92	 	RES 2,D			8	2	2
-			  invoke UnSetBit,OFFSET RegD,2
+			  invoke Inst_RES,OFFSET RegD,2
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop
 
        OpCB93:
 			  ;CB93	 	RES 2,E			8	2	2
-			  invoke UnSetBit,OFFSET RegE,2
+			  invoke Inst_RES,OFFSET RegE,2
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop	
 
        OpCB94:
 			  ;CB94	 	RES 2,H			8	2	2
-			  invoke UnSetBit,OFFSET RegH,2
+			  invoke Inst_RES,OFFSET RegH,2
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop
 
        OpCB95:
 			 ;CB95	 	RES 2,L			8	2	2
-			 invoke UnSetBit,OFFSET RegL,2
+			 invoke Inst_RES,OFFSET RegL,2
 			 EmulateOpcodeTime 8,2
 			 jmp Z80Loop
 
        OpCB96:
 			 ;CB96	 	RES 2,(HL)		15	4	2
 			 invoke DIR_REGISTRO_INDIRECTO,memPtr,RegHL
-			 invoke UnSetBit,reg_di,2
+			 invoke Inst_RES,reg_di,2
 			 EmulateOpcodeTime 15,4
 			 jmp Z80Loop			 
 
        OpCB97:
 			 ;CB97	 	RES 2,A			8	2	2
-			 invoke UnSetBit,OFFSET RegA,2
+			 invoke Inst_RES,OFFSET RegA,2
 			 EmulateOpcodeTime 8,2
 			 jmp Z80Loop	
        OpCB98:
 			 ;CB98		RES 3,B			8	2	2
-			 invoke UnSetBit,OFFSET RegB,3
+			 invoke Inst_RES,OFFSET RegB,3
 			 EmulateOpcodeTime 8,2
 			 jmp Z80Loop
 
        OpCB99:
 			 ;CB99	 	RES 3,C			8	2	2
-			 invoke UnSetBit,OFFSET RegC,3
+			 invoke Inst_RES,OFFSET RegC,3
 			 EmulateOpcodeTime 8,2
 			 jmp Z80Loop
 
        OpCB9A:
 			  ;CB9A	 	RES 3,D			8	2	2
-			  invoke UnSetBit,OFFSET RegD,3
+			  invoke Inst_RES,OFFSET RegD,3
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop
 
        OpCB9B:
 			 ;CB9B	 	RES 3,E			8	2	2
-			 invoke UnSetBit,OFFSET RegE,3
+			 invoke Inst_RES,OFFSET RegE,3
 			 EmulateOpcodeTime 8,2
 			 jmp Z80Loop
 
        OpCB9C:
 			 ;CB9C	 	RES 3,H			8	2	2
-			 invoke UnSetBit,OFFSET RegH,3
+			 invoke Inst_RES,OFFSET RegH,3
 			 EmulateOpcodeTime 8,2
 			 jmp Z80Loop
        OpCB9D:
 			 ;CB9D	 	RES 3,L			8	2	2
-			 invoke UnSetBit,OFFSET RegL,3
+			 invoke Inst_RES,OFFSET RegL,3
 			 EmulateOpcodeTime 8,2
 			 jmp Z80Loop
 
        OpCB9E:
 			  ;CB9E	 	RES 3,(HL)		15	4	2
 			  invoke DIR_REGISTRO_INDIRECTO,memPtr,RegHL
-			  invoke UnSetBit,reg_di,3
+			  invoke Inst_RES,reg_di,3
 			  EmulateOpcodeTime 15,4
 			  jmp Z80Loop
 
        OpCB9F:
 			  ;CB9F	 	RES 3,A			8	2	2
-			  invoke UnSetBit,OFFSET RegA,3
+			  invoke Inst_RES,OFFSET RegA,3
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop
        OpCBA0:
 			  ;CBA0		RES 4,B			8	2	2
-			  invoke UnSetBit,OFFSET RegB,4
+			  invoke Inst_RES,OFFSET RegB,4
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop
 
        OpCBA1:
 			  ;CBA1	 	RES 4,C			8	2	2
-			  invoke UnSetBit,OFFSET RegC,4
+			  invoke Inst_RES,OFFSET RegC,4
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop	
        OpCBA2:
 			  ;CBA2	 	RES 4,D			8	2	2
-			  invoke UnSetBit,OFFSET RegD,4
+			  invoke Inst_RES,OFFSET RegD,4
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop
 
        OpCBA3:
 		      ;CBA3	 	RES 4,E			8	2	2
-			  invoke UnSetBit,OFFSET RegE,4
+			  invoke Inst_RES,OFFSET RegE,4
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop
 
        OpCBA4:
 		      ;CBA4	 	RES 4,H			8	2	2
-			  invoke UnSetBit,OFFSET RegH,4
+			  invoke Inst_RES,OFFSET RegH,4
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop	
 			
        OpCBA5:
 			  ;CBA5	 	RES 4,L			8	2	2
-			  invoke UnSetBit,OFFSET RegL,4
+			  invoke Inst_RES,OFFSET RegL,4
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop			  	
 
        OpCBA6:
 			  ;CBA6	 	RES 4,(HL)		15	4	2
 			  invoke DIR_REGISTRO_INDIRECTO,memPtr,RegHL
-			  invoke UnSetBit,reg_di,4
+			  invoke Inst_RES,reg_di,4
 			  EmulateOpcodeTime 15,4
 			  jmp Z80Loop
        OpCBA7:
 			  ;CBA7	 	RES 4,A			8	2	2
-			  invoke UnSetBit,OFFSET RegA,4
+			  invoke Inst_RES,OFFSET RegA,4
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop
 
        OpCBA8:
 			 ;CBA8		RES 5,B			8	2	2
-			 invoke UnSetBit,OFFSET RegB,5
+			 invoke Inst_RES,OFFSET RegB,5
 			 EmulateOpcodeTime 8,2
 			 jmp Z80Loop
        OpCBA9:
 			 ;CBA9	 	RES 5,C			8	2	2
-			 invoke UnSetBit,OFFSET RegC,5
+			 invoke Inst_RES,OFFSET RegC,5
 			 EmulateOpcodeTime 8,2
 			 jmp Z80Loop	
 
        OpCBAA:
 			 ;CBAA	 	RES 5,D			8	2	2
-			 invoke UnSetBit,OFFSET RegD,5
+			 invoke Inst_RES,OFFSET RegD,5
 			 EmulateOpcodeTime 8,2
 			 jmp Z80Loop
 
        OpCBAB:
 			  ;CBAB	 	RES 5,E			8	2	2
-			  invoke UnSetBit,OFFSET RegE,5
+			  invoke Inst_RES,OFFSET RegE,5
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop 
 
        OpCBAC:
 			  ;CBAC	 	RES 5,H			8	2	2
-			  invoke UnSetBit,OFFSET RegH,5
+			  invoke Inst_RES,OFFSET RegH,5
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop 
 
        OpCBAD:
 			  ;CBAD	 	RES 5,L			8	2	2
-			  invoke UnSetBit,OFFSET RegL,5
+			  invoke Inst_RES,OFFSET RegL,5
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop 
 
        OpCBAE:
 			  ;CBAE	 	RES 5,(HL)		15	4	2
 			  invoke DIR_REGISTRO_INDIRECTO,memPtr,RegHL
-			  invoke UnSetBit,reg_di,5
+			  invoke Inst_RES,reg_di,5
 			  EmulateOpcodeTime 15,4
 			  jmp Z80Loop	
 
        OpCBAF:
 			  ;CBAF	 	RES 5,A			8	2	2
-			  invoke UnSetBit,OFFSET RegA,5
+			  invoke Inst_RES,OFFSET RegA,5
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop
 
        OpCBB0:
 			  ;CBB0		RES 6,B			8	2	2
-			  invoke UnSetBit,OFFSET RegB,6
+			  invoke Inst_RES,OFFSET RegB,6
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop
 
        OpCBB1:
 			  ;CBB1	 	RES 6,C			8	2	2
-			  invoke UnSetBit,OFFSET RegC,6
+			  invoke Inst_RES,OFFSET RegC,6
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop
 
        OpCBB2:
 			  ;CBB2	 	RES 6,D			8	2	2
-			  invoke UnSetBit,OFFSET RegD,6
+			  invoke Inst_RES,OFFSET RegD,6
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop
 
        OpCBB3:
 			  ;CBB3	 	RES 6,E			8	2	2
-			  invoke UnSetBit,OFFSET RegE,6
+			  invoke Inst_RES,OFFSET RegE,6
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop
        OpCBB4:
 			  ;CBB4	 	RES 6,H			8	2	2
-			  invoke UnSetBit,OFFSET RegH,6
+			  invoke Inst_RES,OFFSET RegH,6
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop	
 
        OpCBB5:
 			  ;CBB5	 	RES 6,L			8	2	2
-			  invoke UnSetBit,OFFSET RegL,6
+			  invoke Inst_RES,OFFSET RegL,6
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop
 
        OpCBB6:
 			 ;CBB6	 	RES 6,(HL)		15	4	2
 			 invoke DIR_REGISTRO_INDIRECTO,memPtr,RegHL
-			 invoke UnSetBit,reg_di,6
+			 invoke Inst_RES,reg_di,6
 			 EmulateOpcodeTime 15,4
 			 jmp Z80Loop
 
        OpCBB7:
 	          ;CBB7	 	RES 6,A			8	2	2
-			  invoke UnSetBit,OFFSET RegA,6
+			  invoke Inst_RES,OFFSET RegA,6
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop
 
        OpCBB8:
 			  ;CBB8		RES 7,B			8	2	2
-			  invoke UnSetBit,OFFSET RegB,7
+			  invoke Inst_RES,OFFSET RegB,7
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop	
 
        OpCBB9:
 			  ;CBB9	 	RES 7,C			8	2	2
-			  invoke UnSetBit,OFFSET RegC,7
+			  invoke Inst_RES,OFFSET RegC,7
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop	
 
        OpCBBA:
 			  ;CBBA	 	RES 7,D			8	2	2
-			  invoke UnSetBit,OFFSET RegD,7
+			  invoke Inst_RES,OFFSET RegD,7
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop
 
        OpCBBB:
 			  ;CBBB	 	RES 7,E			8	2	2
-			  invoke UnSetBit,OFFSET RegE,7
+			  invoke Inst_RES,OFFSET RegE,7
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop
 
        OpCBBC:
 			  ;CBBC	 	RES 7,H			8	2	2
-			  invoke UnSetBit,OFFSET RegH,7
+			  invoke Inst_RES,OFFSET RegH,7
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop
 
        OpCBBD:
 			  ;CBBD	 	RES 7,L			8	2	2
-			  invoke UnSetBit,OFFSET RegL,7
+			  invoke Inst_RES,OFFSET RegL,7
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop
 
        OpCBBE:
 			  ;CBBE	 	RES 7,(HL)		15	4	2
 			  invoke DIR_REGISTRO_INDIRECTO,memPtr,RegHL
-			  invoke UnSetBit,reg_di,7
+			  invoke Inst_RES,reg_di,7
 			  EmulateOpcodeTime 15,4
 			  jmp Z80Loop
 
        OpCBBF:
 			  ;CBBF	 	RES 7,A			8	2	2
-			  invoke UnSetBit,OFFSET RegA,7
+			  invoke Inst_RES,OFFSET RegA,7
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop
 
        OpCBC0:
 			  ;CBC0		SET 0,B			8	2	2
-			  invoke SetBit,OFFSET RegA,0
+			  invoke Inst_Set,OFFSET RegB,0
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop 		
 
        OpCBC1:
 			  ;CBC1		SET 0,C			8	2	2
-			  invoke SetBit,OFFSET RegC,0
+			  invoke Inst_Set,OFFSET RegC,0
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop
        OpCBC2:
 			  ; CBC2		SET 0,D			8	2	2
-			  invoke SetBit,OFFSET RegD,0
+			  invoke Inst_Set,OFFSET RegD,0
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop			  		
 
        OpCBC3:
 			  ;CBC3		SET 0,E			8	2	2
-			  invoke SetBit,OFFSET RegE,0
+			  invoke Inst_Set,OFFSET RegE,0
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop
 
        OpCBC4:
 			  ;CBC4	 	SET 0,H			8	2	2
-			  invoke SetBit,OFFSET RegH,0
+			  invoke Inst_Set,OFFSET RegH,0
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop  
 
        OpCBC5:
 			  ;CBC5	 	SET 0,L			8	2	2
-			  invoke SetBit,OFFSET RegL,0
+			  invoke Inst_Set,OFFSET RegL,0
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop
 
        OpCBC6:
 			 ;CBC6	 	SET 0,(HL)		15	4	2
 			 invoke DIR_REGISTRO_INDIRECTO,memPtr,RegHL
-			 invoke SetBit,reg_di,0
+			 invoke Inst_Set,reg_di,0
 			 EmulateOpcodeTime 15,4
 			 jmp Z80Loop
 
        OpCBC7:
 			  ;CBC7	 	SET 0,A			8	2	2
-			  invoke SetBit,OFFSET RegA,0
+			  invoke Inst_Set,OFFSET RegA,0
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop
 
        OpCBC8:
 			 ;CBC8		SET 1,B			8	2	2
-			 invoke SetBit,OFFSET RegB,1
+			 invoke Inst_Set,OFFSET RegB,1
 			 EmulateOpcodeTime 8,2
 			 jmp Z80Loop
 
        OpCBC9:
 			 ;CBC9	 	SET 1,C			8	2	2
-			 invoke SetBit,OFFSET RegC,1
+			 invoke Inst_Set,OFFSET RegC,1
 			 EmulateOpcodeTime 8,2
 			 jmp Z80Loop
 
        OpCBCA:
 			 ;CBCA	 	SET 1,D			8	2	2
-			 invoke SetBit,OFFSET RegD,1
+			 invoke Inst_Set,OFFSET RegD,1
 			 EmulateOpcodeTime 8,2
 			 jmp Z80Loop
 
        OpCBCB:
 			 ;CBCB	 	SET 1,E			8	2	2
-			 invoke SetBit,OFFSET RegE,1
+			 invoke Inst_Set,OFFSET RegE,1
 			 EmulateOpcodeTime 8,2
 			 jmp Z80Loop
 
        OpCBCC:
 			 ;CBCC	 	SET 1,H			8	2	2
-			 invoke SetBit,OFFSET RegH,1
+			 invoke Inst_Set,OFFSET RegH,1
 			 EmulateOpcodeTime 8,2
 			 jmp Z80Loop
 
        OpCBCD:
 			  ;CBCD	 	SET 1,L			8	2	2
-			  invoke SetBit,OFFSET RegL,1
+			  invoke Inst_Set,OFFSET RegL,1
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop
 
        OpCBCE:
 			  ;CBCE	 	SET 1,(HL)		15	4	2
 			  invoke DIR_REGISTRO_INDIRECTO,memPtr,RegHL
-			  invoke SetBit,reg_di,1
+			  invoke Inst_Set,reg_di,1
 			  EmulateOpcodeTime 15,4
 			  jmp Z80Loop
 
        OpCBCF:
 			  ;CBCF	 	SET 1,A			8	2	2
-			  invoke SetBit,OFFSET RegA,1
+			  invoke Inst_Set,OFFSET RegA,1
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop
 
        OpCBD0:
 			  ;CBD0		SET 2,B			8	2	2
-			  invoke SetBit,OFFSET RegB,2
+			  invoke Inst_Set,OFFSET RegB,2
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop
        OpCBD1:
 			  ;CBD1	 	SET 2,C			8	2	2
-			  invoke SetBit,OFFSET RegC,2
+			  invoke Inst_Set,OFFSET RegC,2
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop	
 
        OpCBD2:
 			  ;CBD2	 	SET 2,D			8	2	2
-			  invoke SetBit,OFFSET RegD,2
+			  invoke Inst_Set,OFFSET RegD,2
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop
        OpCBD3:
 			  ;CBD3	 	SET 2,E			8	2	2
-			  invoke SetBit,OFFSET RegE,2
+			  invoke Inst_Set,OFFSET RegE,2
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop	
        OpCBD4:
 			  ;CBD4	 	SET 2,H			8	2	2
-			  invoke SetBit,OFFSET RegH,2
+			  invoke Inst_Set,OFFSET RegH,2
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop
 
        OpCBD5:
 			  ;CBD5	 	SET 2,L			8	2	2
-			  invoke SetBit,OFFSET RegL,2
+			  invoke Inst_Set,OFFSET RegL,2
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop
 
        OpCBD6:
 			  ;CBD6	 	SET 2,(HL)		15	4	2
 			  invoke DIR_REGISTRO_INDIRECTO,memPtr,RegHL
-			  invoke SetBit,reg_di,2
+			  invoke Inst_Set,reg_di,2
 			  EmulateOpcodeTime 15,4
 			  jmp Z80Loop 	
 
        OpCBD7:
 			  ;CBD7	 	SET 2,A			8	2	2
-			  invoke SetBit,OFFSET RegA,2
+			  invoke Inst_Set,OFFSET RegA,2
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop
 
        OpCBD8:
 			  ;CBD8		SET 3,B			8	2	2
-			  invoke SetBit,OFFSET RegB,3
+			  invoke Inst_Set,OFFSET RegB,3
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop
 
        OpCBD9:
 			 ;CBD9	 	SET 3,C			8	2	2
-			 invoke SetBit,OFFSET RegC,3
+			 invoke Inst_Set,OFFSET RegC,3
 			 EmulateOpcodeTime 8,2
 			 jmp Z80Loop 
        OpCBDA:
 			 ;CBDA	 	SET 3,D			8	2	2
-			 invoke SetBit,OFFSET RegD,3
+			 invoke Inst_Set,OFFSET RegD,3
 			 EmulateOpcodeTime 8,2
 			 jmp Z80Loop 
        OpCBDB:
 			  ;CBDB	 	SET 3,E			8	2	2
-			  invoke SetBit,OFFSET RegE,3
+			  invoke Inst_Set,OFFSET RegE,3
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop 
        OpCBDC:
 			  ;CBDC	 	SET 3,H			8	2	2
-			  invoke SetBit,OFFSET RegH,3
+			  invoke Inst_Set,OFFSET RegH,3
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop
        OpCBDD:
 			 ;CBDD	 	SET 3,L			8	2	2
-		     invoke SetBit,OFFSET RegL,3
+		     invoke Inst_Set,OFFSET RegL,3
 			 EmulateOpcodeTime 8,2
 			 jmp Z80Loop
 
        OpCBDE:
 			 ;CBDE	 	SET 3,(HL)		15	4	2
 			 invoke DIR_REGISTRO_INDIRECTO,memPtr,RegHL
-			 invoke SetBit,reg_di,3
+			 invoke Inst_Set,reg_di,3
 			 EmulateOpcodeTime 15,4
 			 jmp Z80Loop
        OpCBDF:
 			 ;CBDF	 	SET 3,A			8	2	2
-			 invoke SetBit,OFFSET RegA,3
+			 invoke Inst_Set,OFFSET RegA,3
 			 EmulateOpcodeTime 8,2
 			 jmp Z80Loop
 
        OpCBE0:
 			  ;CBE0		SET 4,B			8	2	2
-			  invoke SetBit,OFFSET RegB,4
+			  invoke Inst_Set,OFFSET RegB,4
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop
 
        OpCBE1:
 			 ;CBE1	 	SET 4,C			8	2	2
-			 invoke SetBit,OFFSET RegC,4
+			 invoke Inst_Set,OFFSET RegC,4
 			 EmulateOpcodeTime 8,2
 			 jmp Z80Loop
 
        OpCBE2:
 			 ;CBE2	 	SET 4,D			8	2	2
-			 invoke SetBit,OFFSET RegD,4
+			 invoke Inst_Set,OFFSET RegD,4
 			 EmulateOpcodeTime 8,2
 			 jmp Z80Loop
 
        OpCBE3:
 			 ;CBE3	 	SET 4,E			8	2	2
-			 invoke SetBit,OFFSET RegE,4
+			 invoke Inst_Set,OFFSET RegE,4
 			 EmulateOpcodeTime 8,2
 			 jmp Z80Loop
 
        OpCBE4:
 			 ;CBE4	 	SET 4,H			8	2	2
-			 invoke SetBit,OFFSET RegH,4
+			 invoke Inst_Set,OFFSET RegH,4
 			 EmulateOpcodeTime 8,2
 			 jmp Z80Loop
 
        OpCBE5:
 			 ;CBE5	 	SET 4,L			8	2	2
-			 invoke SetBit,OFFSET RegL,4
+			 invoke Inst_Set,OFFSET RegL,4
 			 EmulateOpcodeTime 8,2
 			 jmp Z80Loop
 
        OpCBE6:
 			 ;CBE6	 	SET 4,(HL)		15	4	2
 			 invoke DIR_REGISTRO_INDIRECTO,memPtr,RegHL
-			 invoke SetBit,reg_di,4
+			 invoke Inst_Set,reg_di,4
 			 EmulateOpcodeTime 15,4
 			 jmp Z80Loop
 
        OpCBE7:
 			 ;CBE7	 	SET 4,A			8	2	2
-			 invoke SetBit,OFFSET RegA,4
+			 invoke Inst_Set,OFFSET RegA,4
 			 EmulateOpcodeTime 8,2
 			 jmp Z80Loop
        OpCBE8:
 			 ;CBE8		SET 5,B			8	2	2
-			 invoke SetBit,OFFSET RegB,5
+			 invoke Inst_Set,OFFSET RegB,5
 			 EmulateOpcodeTime 8,2
 			 jmp Z80Loop	
 
        OpCBE9:
 			 ;CBE9	 	SET 5,C			8	2	2
-			 invoke SetBit,OFFSET RegC,5
+			 invoke Inst_Set,OFFSET RegC,5
 			 EmulateOpcodeTime 8,2
 			 jmp Z80Loop
 
        OpCBEA:
 			 ;CBEA	 	SET 5,D			8	2	2
-			 invoke SetBit,OFFSET RegD,5
+			 invoke Inst_Set,OFFSET RegD,5
 			 EmulateOpcodeTime 8,2
 			 jmp Z80Loop
 
        OpCBEB:
 			 ;CBEB	 	SET 5,E			8	2	2
-			 invoke SetBit,OFFSET RegE,5
+			 invoke Inst_Set,OFFSET RegE,5
 			 EmulateOpcodeTime 8,2
 			 jmp Z80Loop
 
        OpCBEC:
 			 ;CBEC	 	SET 5,H			8	2	2
-			 invoke SetBit,OFFSET RegH,5
+			 invoke Inst_Set,OFFSET RegH,5
 			 EmulateOpcodeTime 8,2
 			 jmp Z80Loop
 
        OpCBED:
 			 ;CBED	 	SET 5,L			8	2	2
-			 invoke SetBit,OFFSET RegL,5
+			 invoke Inst_Set,OFFSET RegL,5
 			 EmulateOpcodeTime 8,2
 			 jmp Z80Loop
 
        OpCBEE:
 			  ;CBEE	 	SET 5,(HL)		15	4	2
 			  invoke DIR_REGISTRO_INDIRECTO,memPtr,RegHL
-			  invoke SetBit,reg_di,5
+			  invoke Inst_Set,reg_di,5
 			  EmulateOpcodeTime 15,4
 			  jmp Z80Loop	
        OpCBEF:
 			  ;CBEF	 	SET 5,A			8	2	2
-			  invoke SetBit,OFFSET RegA,5
+			  invoke Inst_Set,OFFSET RegA,5
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop
        OpCBF0:	
 			  ;CBF0		SET 6,B			8	2	2
-			  invoke SetBit,OFFSET RegB,6
+			  invoke Inst_Set,OFFSET RegB,6
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop	
 
        OpCBF1:
 			  ;CBF1	 	SET 6,C			8	2	2
-			  invoke SetBit,OFFSET RegC,6
+			  invoke Inst_Set,OFFSET RegC,6
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop
        OpCBF2:
 			 ;CBF2	 	SET 6,D			8	2	2
-			 invoke SetBit,OFFSET RegD,6
+			 invoke Inst_Set,OFFSET RegD,6
 			 EmulateOpcodeTime 8,2
 			 jmp Z80Loop
        OpCBF3:
 			 ;CBF3	 	SET 6,E			8	2	2
-			 invoke SetBit,OFFSET RegE,6
+			 invoke Inst_Set,OFFSET RegE,6
 			 EmulateOpcodeTime 8,2
 			 jmp Z80Loop
 
        OpCBF4:
 			 ;CBF4	 	SET 6,H			8	2	2
-			 invoke SetBit,OFFSET RegH,6
+			 invoke Inst_Set,OFFSET RegH,6
 			 EmulateOpcodeTime 8,2
 			 jmp Z80Loop
 
        OpCBF5:
 			 ;CBF5	 	SET 6,L			8	2	2
-			 invoke SetBit,OFFSET RegL,6
+			 invoke Inst_Set,OFFSET RegL,6
 			 EmulateOpcodeTime 8,2
 			 jmp Z80Loop
 
        OpCBF6:
 			 ;CBF6	 	SET 6,(HL)		15	4	2
 		     invoke DIR_REGISTRO_INDIRECTO,memPtr,RegHL
-			 invoke SetBit,reg_di,6
+			 invoke Inst_Set,reg_di,6
 			 EmulateOpcodeTime 15,4
 			 jmp Z80Loop
        OpCBF7:
 			  ;CBF7	 	SET 6,A			8	2	2
-			  invoke SetBit,OFFSET RegA,6
+			  invoke Inst_Set,OFFSET RegA,6
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop
 
        OpCBF8:
 			  ;CBF8		SET 7,B			8	2	2
-			  invoke SetBit,OFFSET RegL,7
+			  invoke Inst_Set,OFFSET RegL,7
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop	
        OpCBF9:
 			 ;CBF9	 	SET 7,C			8	2	2
-			 invoke SetBit,OFFSET RegC,7
+			 invoke Inst_Set,OFFSET RegC,7
 			 EmulateOpcodeTime 8,2
 			 jmp Z80Loop
 
        OpCBFA:
 			 ;CBFA	 	SET 7,D			8	2	2
-			 invoke SetBit,OFFSET RegD,7
+			 invoke Inst_Set,OFFSET RegD,7
 			 EmulateOpcodeTime 8,2
 			 jmp Z80Loop
        OpCBFB:
 			 ;CBFB	 	SET 7,E			8	2	2
-			 invoke SetBit,OFFSET RegE,7
+			 invoke Inst_Set,OFFSET RegE,7
 			 EmulateOpcodeTime 8,2
 			 jmp Z80Loop 			
        OpCBFC:
 			 ;CBFC	 	SET 7,H			8	2	2
-			 invoke SetBit,OFFSET RegH,7
+			 invoke Inst_Set,OFFSET RegH,7
 			 EmulateOpcodeTime 8,2
 			 jmp Z80Loop
        OpCBFD:
 			 ;CBFD	 	SET 7,L			8	2	2
-			 invoke SetBit,OFFSET RegL,7
+			 invoke Inst_Set,OFFSET RegL,7
 			 EmulateOpcodeTime 8,2
 			 jmp Z80Loop
 
        OpCBFE:
 			 ;CBFE	 	SET 7,(HL)		15	4	2
 			 invoke DIR_REGISTRO_INDIRECTO,memPtr,RegHL
-			 invoke SetBit,reg_di,7
+			 invoke Inst_Set,reg_di,7
 			 EmulateOpcodeTime 15,4
 			 jmp Z80Loop
        OpCBFF:
 			 ;CBFF	 	SET 7,A			8	2	2
-			 invoke SetBit,OFFSET RegA,7
+			 invoke Inst_Set,OFFSET RegA,7
 			 EmulateOpcodeTime 8,2
 			 jmp Z80Loop
        OpDD09:
@@ -3992,178 +3986,178 @@ Z80Loop:
 				jmp Z80Loop
 	   OpDDCB80:   
 				;RES  0,(IX+nn) &  LD   B,(IX+nn)
-				invoke UnSetBit,reg_di,0
+				invoke Inst_RES,reg_di,0
 				CopyToMaskedRegOrNextOpcode 80h, reg_di
 				EmulateOpcodeTime 20,5
 				jmp Z80Loop
        OpDDCB86:
 				;DDCB d 86	RES 0,(IX+d) 20 5				
-				invoke UnSetBit,reg_di,0
+				invoke Inst_RES,reg_di,0
 				EmulateOpcodeTime 20,5
 				jmp Z80Loop
 	   OpDDCB88:   
 				;RES  1,(IX+nn) &  LD   B,(IX+nn)
-				invoke UnSetBit,reg_di,1
+				invoke Inst_RES,reg_di,1
 				CopyToMaskedRegOrNextOpcode 88h, reg_di
 				EmulateOpcodeTime 20,5
 				jmp Z80Loop
        OpDDCB8E:
 				;DDCB d 8E	RES 1,(IX+d) 23 6			
-				invoke UnSetBit,reg_di,1
+				invoke Inst_RES,reg_di,1
 				EmulateOpcodeTime 23,6
 				jmp Z80Loop
 	   OpDDCB90:   
 				;RES  2,(IX+nn) &  LD   B,(IX+nn)
-				invoke UnSetBit,reg_di,2
+				invoke Inst_RES,reg_di,2
 				CopyToMaskedRegOrNextOpcode 90h, reg_di
 				EmulateOpcodeTime 20,5
 				jmp Z80Loop
        OpDDCB96:
 				;DDCB d 96	RES 2,(IX+d) 23 6				
-				invoke UnSetBit,reg_di,2
+				invoke Inst_RES,reg_di,2
 				EmulateOpcodeTime 23,6
 				jmp Z80Loop
 	   OpDDCB98:   
 				;RES  3,(IX+nn) &  LD   B,(IX+nn)
-				invoke UnSetBit,reg_di,3
+				invoke Inst_RES,reg_di,3
 				CopyToMaskedRegOrNextOpcode 98h, reg_di
 				EmulateOpcodeTime 20,5
 				jmp Z80Loop
        OpDDCB9E:
 				;DDCB d 9E	RES 3,(IX+d) 23  6				
-				invoke UnSetBit,reg_di,3
+				invoke Inst_RES,reg_di,3
 				EmulateOpcodeTime 23,6 
 				jmp Z80Loop
 	   OpDDCBA0:   
 				;RES  4,(IX+nn) &  LD   B,(IX+nn)
-				invoke UnSetBit,reg_di,4
+				invoke Inst_RES,reg_di,4
 				CopyToMaskedRegOrNextOpcode 0A0h, reg_di
 				EmulateOpcodeTime 20,5
 				jmp Z80Loop
        OpDDCBA6:
 				;DDCB d A6	RES 4,(IX+d) 23 6				
-				invoke UnSetBit,reg_di,4
+				invoke Inst_RES,reg_di,4
 				EmulateOpcodeTime 23,6
 				jmp Z80Loop
 	   OpDDCBA8:   
 				;RES  5,(IX+nn) &  LD   B,(IX+nn)
-				invoke UnSetBit,reg_di,5
+				invoke Inst_RES,reg_di,5
 				CopyToMaskedRegOrNextOpcode 0A8h, reg_di
 				EmulateOpcodeTime 20,5
 				jmp Z80Loop
        OpDDCBAE:
 				;DDCB d AE	RES 5,(IX+d) 23 6				
-				invoke UnSetBit,reg_di,5
+				invoke Inst_RES,reg_di,5
 				EmulateOpcodeTime 23,6
 				jmp Z80Loop
 	   OpDDCBB0:   
 				;RES  6,(IX+nn) &  LD   B,(IX+nn)
-				invoke UnSetBit,reg_di,6
+				invoke Inst_RES,reg_di,6
 				CopyToMaskedRegOrNextOpcode 0B0h, reg_di
 				EmulateOpcodeTime 20,5
 				jmp Z80Loop
        OpDDCBB6:
 				;DDCB d B6	RES 6,(IX+d) 23 6				
-				invoke UnSetBit,reg_di,6
+				invoke Inst_RES,reg_di,6
 				EmulateOpcodeTime 23,6
 				jmp Z80Loop
 	   OpDDCBB8:   
 				;RES  7,(IX+nn) &  LD   B,(IX+nn)
-				invoke UnSetBit,reg_di,7
+				invoke Inst_RES,reg_di,7
 				CopyToMaskedRegOrNextOpcode 0B8h, reg_di
 				EmulateOpcodeTime 20,5
 				jmp Z80Loop
        OpDDCBBE:
 				;DDCB d BE	RES 7,(IX+d) 23 6				
-				invoke UnSetBit,reg_di,7
+				invoke Inst_RES,reg_di,7
 				EmulateOpcodeTime 23,6
 				jmp Z80Loop
 	   OpDDCBC0:   
 				;SET  0,(IX+nn) &  LD   B,(IX+nn)
-				invoke SetBit,reg_di,0
+				invoke Inst_Set,reg_di,0
 				CopyToMaskedRegOrNextOpcode 0C0h, reg_di
 				EmulateOpcodeTime 20,5
 				jmp Z80Loop
        OpDDCBC6:
 				;DDCB d C6	SET 0,(IX+d) 23 6				
-				invoke SetBit,reg_di,0
+				invoke Inst_Set,reg_di,0
 				EmulateOpcodeTime 23,6
 				jmp Z80Loop
 	   OpDDCBC8:   
 				;SET  1,(IX+nn) &  LD   B,(IX+nn)
-				invoke SetBit,reg_di,1
+				invoke Inst_Set,reg_di,1
 				CopyToMaskedRegOrNextOpcode 0C8h, reg_di
 				EmulateOpcodeTime 20,5
 				jmp Z80Loop
        OpDDCBCE:
 				;DDCB d CE	SET 1,(IX+d) 23 6				
-				invoke SetBit,reg_di,1
+				invoke Inst_Set,reg_di,1
 				EmulateOpcodeTime 23,6
 				jmp Z80Loop
 	   OpDDCBD0:   
 				;SET  2,(IX+nn) &  LD   B,(IX+nn)
-				invoke SetBit,reg_di,2
+				invoke Inst_Set,reg_di,2
 				CopyToMaskedRegOrNextOpcode 0D0h, reg_di
 				EmulateOpcodeTime 20,5
 				jmp Z80Loop
        OpDDCBD6:
 				;DDCB d D6	SET 2,(IX+d) 23 6				
-				invoke SetBit,reg_di,2
+				invoke Inst_Set,reg_di,2
 				EmulateOpcodeTime 23,6
 				jmp Z80Loop
 	   OpDDCBD8:   
 				;SET  3,(IX+nn) &  LD   B,(IX+nn)
-				invoke SetBit,reg_di,3
+				invoke Inst_Set,reg_di,3
 				CopyToMaskedRegOrNextOpcode 0D8h, reg_di
 				EmulateOpcodeTime 20,5
 				jmp Z80Loop	
        OpDDCBDE:
 				;DDCB d DE	SET 3,(IX+d) 23 6				
-				invoke SetBit,reg_di,3
+				invoke Inst_Set,reg_di,3
 				EmulateOpcodeTime 23,6
 				jmp Z80Loop
 	    OpDDCBE0:   
 				;SET  4,(IX+nn) &  LD   B,(IX+nn)
-				invoke SetBit,reg_di,4
+				invoke Inst_Set,reg_di,4
 				CopyToMaskedRegOrNextOpcode 0E0h, reg_di
 				EmulateOpcodeTime 20,5
 				jmp Z80Loop	
        OpDDCBE6:
 				;DDCB d E6	SET 4,(IX+d) 23 6				
-				invoke SetBit,reg_di,4
+				invoke Inst_Set,reg_di,4
 				EmulateOpcodeTime 23,6
 				jmp Z80Loop
 	   OpDDCBE8:   
 				;SET  5,(IX+nn) &  LD   B,(IX+nn)
-				invoke SetBit,reg_di,5
+				invoke Inst_Set,reg_di,5
 				CopyToMaskedRegOrNextOpcode 0E8h, reg_di
 				EmulateOpcodeTime 20,5
 				jmp Z80Loop	
        OpDDCBEE:
 				;DDCB d EE	SET 5,(IX+d) 23 6				
-				invoke SetBit,reg_di,5
+				invoke Inst_Set,reg_di,5
 				EmulateOpcodeTime 23,6
 				jmp Z80Loop
 	   OpDDCBF0:   
 				;SET  6,(IX+nn) &  LD   B,(IX+nn)
-				invoke SetBit,reg_di,6
+				invoke Inst_Set,reg_di,6
 				CopyToMaskedRegOrNextOpcode 0F0h, reg_di
 				EmulateOpcodeTime 20,5
 				jmp Z80Loop	
        OpDDCBF6:
 				;DDCB d F6	SET 6,(IX+d) 23 6				
-				invoke SetBit,reg_di,6
+				invoke Inst_Set,reg_di,6
 				EmulateOpcodeTime 23,6 
 				jmp Z80Loop
 	   OpDDCBF8:   
 				;SET  6,(IX+nn) &  LD   B,(IX+nn)
-				invoke SetBit,reg_di,7
+				invoke Inst_Set,reg_di,7
 				CopyToMaskedRegOrNextOpcode 0F8h, reg_di
 				EmulateOpcodeTime 20,5
 				jmp Z80Loop	
        OpDDCBFE:      
  				;DDCB d FE	SET 7,(IX+d) 23 6				
-				invoke SetBit,reg_di,7
+				invoke Inst_Set,reg_di,7
 				EmulateOpcodeTime 23,6
 				jmp Z80Loop
        OpDDE1:
@@ -4714,84 +4708,84 @@ Z80Loop:
 				jmp Z80Loop
        OpFDCB86:
 				;FDCB d 86	RES 0,(IY+d) 23 6
-				invoke UnSetBit,reg_di,0
+				invoke Inst_RES,reg_di,0
 				EmulateOpcodeTime 23,6
 				jmp Z80Loop
        OpFDCB8E:
 				;FDCB d 8E	RES 1,(IY+d) 23 6
-				invoke UnSetBit,reg_di,1
+				invoke Inst_RES,reg_di,1
 				EmulateOpcodeTime 23,6
 				jmp Z80Loop
        OpFDCB96:
 				;FDCB d 96	RES 2,(IY+d) 23 6
-				invoke UnSetBit,reg_di,2
+				invoke Inst_RES,reg_di,2
 				EmulateOpcodeTime 23,6
 				jmp Z80Loop
        OpFDCB9E:
 				;FDCB d 9E	RES 3,(IY+d) 23 6
-				invoke UnSetBit,reg_di,3
+				invoke Inst_RES,reg_di,3
 				EmulateOpcodeTime 23,6
 				jmp Z80Loop
        OpFDCBA6:
 				;FDCB d A6	RES 4,(IY+d) 23 6
-				invoke UnSetBit,reg_di,4
+				invoke Inst_RES,reg_di,4
 				EmulateOpcodeTime 23,6
 				jmp Z80Loop
        OpFDCBAE:
 				;FDCB d AE	RES 5,(IY+d) 23 6
-				invoke UnSetBit,reg_di,5
+				invoke Inst_RES,reg_di,5
 				EmulateOpcodeTime 23,6
 				jmp Z80Loop
        OpFDCBB6:
 				;FDCB d B6	RES 6,(IY+d) 23 6
-				invoke UnSetBit,reg_di,6
+				invoke Inst_RES,reg_di,6
 				EmulateOpcodeTime 23,6
 				jmp Z80Loop
        OpFDCBBE:
 				;FDCB d BE	RES 7,(IY+d) 23 6
-				invoke UnSetBit,reg_di,7
+				invoke Inst_RES,reg_di,7
 				EmulateOpcodeTime 23,6
 				jmp Z80Loop
        OpFDCBC6:
 				;FDCB d C6	SET 0,(IY+d) 23 6
-				invoke SetBit,reg_di,0
+				invoke Inst_Set,reg_di,0
 				EmulateOpcodeTime 23,6
 				jmp Z80Loop
        OpFDCBCE:
 				;FDCB d CE	SET 1,(IY+d) 23 6				
-				invoke SetBit,reg_di,1
+				invoke Inst_Set,reg_di,1
 				EmulateOpcodeTime 23,6
 				jmp Z80Loop
        OpFDCBD6:
 				;FDCB d D6	SET 2,(IY+d) 23 6				
-				invoke SetBit,reg_di,2
+				invoke Inst_Set,reg_di,2
 				EmulateOpcodeTime 23,6
 				jmp Z80Loop
 
        OpFDCBDE:
 				;FDCB d DE	SET 3,(IY+d) 23 6				
-				invoke SetBit,reg_di,3
+				invoke Inst_Set,reg_di,3
 				EmulateOpcodeTime 23,6
 				jmp Z80Loop
        OpFDCBE6:
 				;FDCB d E6	SET 4,(IY+d) 23 6				
-				invoke SetBit,reg_di,4
+				invoke Inst_Set,reg_di,4
 				EmulateOpcodeTime 23,6
 				jmp Z80Loop
        OpFDCBEE:
 				;FDCB d EE	SET 5,(IY+d) 23 6				
-				invoke SetBit,reg_di,5
+				invoke Inst_Set,reg_di,5
 				EmulateOpcodeTime 23,6
 				jmp Z80Loop
 
        OpFDCBF6:
 				;FDCB d F6	SET 6,(IY+d) 23 6				
-				invoke SetBit,reg_di,6
+				invoke Inst_Set,reg_di,6
 				EmulateOpcodeTime 23,6
 				jmp Z80Loop
        OpFDCBFE:      
  				;FDCB d FE	SET 7,(IY+d) 23 6				
-				invoke SetBit,reg_di,7
+				invoke Inst_Set,reg_di,7
 				EmulateOpcodeTime 23,6
 				jmp Z80Loop 
        OpFDE1:

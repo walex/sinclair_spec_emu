@@ -37,55 +37,6 @@ ProcesarOpcodeFromRom MACRO JumpTable
 
 ENDM
 
-CargarFlags MACRO
-	
-	lahf
-	mov RegF,ah
-
-ENDM
-
-ModifOverflowFlag MACRO
-
-	jo setoverflow		
-	push x_cx
-	push x_dx
-	invoke UnSetBit,OFFSET RegF, PVF
-	pop x_dx
-	pop x_cx
-	jmp exitoverflow
-
-setoverflow:
-	push x_cx
-	push x_dx
-	invoke SetBit,OFFSET RegF,PVF	
-	pop x_dx
-	pop x_cx
-	
-exitoverflow:
-	
-ENDM	
-
-ModifParityFlag MACRO
-
-	jp setparity		
-	push x_cx
-	push x_dx
-	invoke UnSetBit,OFFSET RegF, PVF
-	pop x_dx
-	pop x_cx
-	jmp exitparity
-
-setparity:
-	push x_cx
-	push x_dx
-	invoke SetBit,OFFSET RegF,PVF	
-	pop x_dx
-	pop x_cx
-	
-exitparity:
-	
-ENDM	
-
 IncRegR MACRO 
 
 mov al,RegR
@@ -110,3 +61,136 @@ mov RegR,al
 	
 ENDM
 
+GetBitMask MACRO dest, args:VARARG
+
+	LOCAL a
+	push x_ax
+	mov Reg_Tmp, 0
+    FOR a, <args>
+		
+		mov x_ax, 1		
+		shl x_ax, a
+		; OF --> PVF
+		and ah, 08h
+		shr ah, 1
+		or al, ah
+		xor ah, ah
+		or Reg_Tmp, x_ax
+	ENDM
+	pop x_ax
+	mov dest, Reg_Tmp
+ENDM
+
+GetBitMaskNeg MACRO dest, args:VARARG
+
+	GetBitMask dest, args
+	not dest
+
+ENDM
+
+ResetFlagBits MACRO args:VARARG
+
+push x_cx
+GetBitMaskNeg x_cx, args
+and RegF, cl
+pop x_cx
+
+ENDM
+
+SetFlagBits MACRO args:VARARG
+
+push x_cx
+GetBitMask x_cx, args
+or RegF, cl
+pop x_cx
+
+ENDM
+
+X86FlagsToZ80Flags MACRO args:VARARG
+	
+	LOCAL OF_SLICE
+	OF_SLICE = OF - PVF
+
+	push x_bx
+	push x_ax
+	pushf
+	ResetFlagBits args
+	pop ax	
+	xor bx, bx
+	FOR a, <args>
+		
+		IF a EQ OF
+			mov bl, 1
+			shl bl, PVF
+			not bl
+			and al, bl
+			mov bx, ax
+			and bx, 0800h
+			shr bx, OF_SLICE
+			or RegF, bl
+		ENDIF
+	
+	ENDM
+	GetBitMask x_bx, args
+	and al, bl
+	or RegF, al
+	pop x_ax
+	pop x_bx
+
+ENDM
+
+SetPVFromBC MACRO
+
+push x_ax
+ResetFlagBits PVF
+mov ax, RegBC
+test ax, ax
+pushf
+GetBitMask x_ax, ZF
+popf
+lahf
+and ah, al
+xor ah, al
+shl ah, PVF
+or RegF, ah
+pop x_ax
+
+ENDM
+
+SetIOFlags MACRO value
+
+push x_ax
+mov al, value
+test al, al
+X86FlagsToZ80Flags SF, ZF, PVF
+ResetFlagBits HF, NF
+pop x_ax
+
+ENDM
+
+LoadZ80CarryFlag MACRO
+
+push x_ax
+push x_bx
+GetBitMaskNeg x_bx, CF
+lahf
+and ah, bl
+not bl
+mov bh, RegF
+and bh, bl
+or ah, bh
+sahf
+pop x_bx
+pop x_ax
+
+ENDM
+
+TestZ80Flag MACRO flag
+
+push x_cx
+GetBitMask x_cx, flag
+mov ch, RegF
+and ch, cl
+test ch, ch
+
+ENDM

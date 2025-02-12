@@ -105,6 +105,8 @@
 
    Reg_Tmp PTR_DATA_TYPE 0	 
    
+    OF EQU 11	; x86 oferflow flag
+
 	SF EQU 7	;Bit 7 - Sign flag
 	ZF EQU 6	;Bit 6 - Zero flag
 	NOUSO5 EQU 5	;Bit 5 - documented as unused (see note)

@@ -1,55 +1,20 @@
 .code
 
-SetBit PROC
-	
+LD_SetFlagIR PROC
+
 ; parameters
-; Reg:PTR BYTE -> x_cx
-; pos:BYTE -> dl
+; Reg -> x_cx
 
-	mov x_ax,x_cx	
-	mov cl,dl	
-	mov bl,1
-	shl bl,cl	
-	or [x_ax],bl	
-	ret
+mov cl, [x_cx]
+test cl,cl
+X86FlagsToZ80Flags SF, ZF
+ResetFlagBits HF, NF, PVF
+mov al, IFF2
+shl al, PVF
+or RegF, al
+ret
 
-SetBit ENDP
-
-UnSetBit PROC
-	
-; parameters
-; Reg:PTR BYTE -> x_cx
-; pos:BYTE -> dl
-
-	mov x_ax,x_cx	
-	mov cl,dl
-	mov bl,1
-	shl bl,cl			
-	not bl
-	and [x_ax],bl		
-	ret
-
-UnSetBit ENDP
-
-SetFlagIR PROC
-
-test RegI,0ffh
-CargarFlags
-invoke UnSetBit,OFFSET RegF,1
-invoke UnSetBit,OFFSET RegF,4
-
-cmp IFF2,1
-jz PVFlag
-invoke UnSetBit,OFFSET RegF,PVF
-jmp salirPVFlag
-
-PVFlag:
-invoke SetBit,OFFSET RegF,PVF
-
-salirPVFlag:
- ret
-
-SetFlagIR ENDP
+LD_SetFlagIR ENDP
 
 ChecktBit PROC
 	
