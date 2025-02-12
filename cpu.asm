@@ -63,8 +63,8 @@ memPtr BYTE_PTR 0
 
 include ..\..\opcodesdef.inc  
 
-.code
-
+.code		
+		
 		IFDEF rax
 			mov reg_pc, rcx
 		ELSE

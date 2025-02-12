@@ -376,88 +376,90 @@ Inst_DEC8 ENDP
 
 Inst_DAA PROC
 
+mov ah, 0
+Inst_DAA_step1:
 mov al, RegA
-xor bl, bl
-ResetFlagBits CF
+mov bl, RegF
+GetBitMask x_cx, HF
+and bl, cl
+jnz Inst_DAA_inc_T1
+and al, 0fh
+cmp al, 09h
+jbe Inst_DAA_step2
+Inst_DAA_inc_T1:
+inc ah
 
-;- If the A register is greater than 0x99, OR the Carry flag is SET, then
-;
-;    The upper four bits of the Correction Factor are set to 6,
-;    and the Carry flag will be SET.
-;  Else
-;    The upper four bits of the Correction Factor are set to 0,
-;    and the Carry flag will be CLEARED.
-;
-
-cmp al, 99h
-jle daa_step2
-invoke ChecktBit,OFFSET RegF,CF
-jz daa_step2
-mov bl, 60h
+Inst_DAA_step2:
+mov al, RegA
+mov bl, RegF
+GetBitMask x_cx, CF
+and bl, cl
+jnz Inst_DAA_inc_T2
+cmp al, 099h
+jbe Inst_DAA_step3
+Inst_DAA_inc_T2:
+add ah, 2
 SetFlagBits CF
 
-;
-;- If the lower four bits of the A register (A AND 0x0F) is greater than 9,
-;  OR the Half-Carry (H) flag is SET, then
-;
-;    The lower four bits of the Correction Factor are set to 6.
-;  Else
-;    The lower four bits of the Correction Factor are set to 0.
-;
-;
+mov al, RegA
+mov bh, al
+mov bl, RegF
 
-daa_step2:
-mov ah, al
-and ah, 0fh
-cmp ah, 9h
-jle daa_step3
-invoke ChecktBit,OFFSET RegF,HF
-jz daa_step3
-or bl, 6h
-
-;- This results in a Correction Factor of 0x00, 0x06, 0x60 or 0x66.
-;
-;
-
-;- If the N flag is CLEAR, then
-;
-;    ADD the Correction Factor to the A register.
-;  Else
-;    SUBTRACT the Correction Factor from the A register.
-;
-;
-
-daa_step3:
-mov ah, al
-invoke ChecktBit,OFFSET RegF,NF
-jnz sub_cf
-add al, bl
-jmp daa_step4
-sub_cf:
-sub al, bl
-mov RegA, al
-
-;- The Flags are set as follows:
-;
-;  Carry:      Set/clear as in the first step above.
-;
-;  Half-Carry: Set if the correction operation caused a binary carry/borrow
-;              from bit 3 to bit 4.
-;              For this purpose, may be calculated as:
-;              Bit 4 of: A(before) XOR A(after).
-;
-;  S,Z,P,5,3:  Set as for simple logic operations on the resultant A value.
-;
-;  N:          Leave.
-
-daa_step4:
+Inst_DAA_step3:
+GetBitMask x_cx, NF
+and bl, cl
+jnz Inst_DAA_N_is_set
+;flags.H = ((A & 0x0F) >= 0x0A)
 ResetFlagBits HF
-and ah, 8h
-and al, 8h
-xor ah, al
-jz finish
+and bh, 0fh
+cmp bh, 0ah
+jb Inst_DAA_step4
 SetFlagBits HF
-finish:
+jmp Inst_DAA_step4
+Inst_DAA_N_is_set:
+GetBitMask x_cx, HF
+mov bl, RegF
+and bl, cl
+jnz Inst_DAA_H_is_set
+jmp Inst_DAA_step4
+Inst_DAA_H_is_set:
+;flags.H = (((A & 0x0F)) < 6);
+ResetFlagBits HF
+and bh, 0fh
+cmp bh, 06h
+jae Inst_DAA_step4
+SetFlagBits HF
+
+Inst_DAA_step4:
+Inst_DAA_T_case1:
+cmp ah, 1
+jnz Inst_DAA_T_case2
+; A += (flags.N)?0xFA:0x06; // -6:6 --> neg(a): a
+add al, 06h
+jmp Inst_DAA_step5
+Inst_DAA_T_case2:
+cmp ah, 2
+jnz Inst_DAA_T_case3
+; A += (flags.N)?0xA0:0x60; // -0x60:0x60 --> neg(a): a
+add al, 060h
+jmp Inst_DAA_step5
+Inst_DAA_T_case3:
+cmp ah, 3
+jnz Inst_DAA_step5
+;A += (flags.N)?0x9A:0x66; // -0x66:0x66 --> neg(a): a
+add al, 066h
+
+Inst_DAA_step5:
+GetBitMask x_cx, NF
+mov bl, RegF
+and bl, cl
+jz Inst_DAA_step6
+neg al
+
+Inst_DAA_step6:
+test al, al
+X86FlagsToZ80Flags SF, ZF, PVF
+mov RegA, al
 ret
 
 Inst_DAA ENDP

@@ -116,3 +116,57 @@ int main(int argc, char* argv[]) {
 	DestroyTimer();
 	return 0;
 }
+
+/*
+
+void daa()
+{
+   int t;
+
+   t=0;
+
+   // 4 T states
+   T(4);
+
+   if(flags.H || ((A & 0xF) > 9) )
+		 t++;
+
+   if(flags.C || (A > 0x99) )
+   {
+		 t += 2;
+		 flags.C = 1;
+   }
+
+   // builds final H flag
+
+   if (flags.N) {
+	
+	if (flags.H) {
+		
+		flags.H = (((A & 0x0F)) < 6);
+	}
+   } else {
+	flags.H = ((A & 0x0F) >= 0x0A);
+   }
+
+   switch(t)
+   {
+		case 1:
+			A += (flags.N)?0xFA:0x06; // -6:6
+			break;
+		case 2:
+			A += (flags.N)?0xA0:0x60; // -0x60:0x60
+			break;
+		case 3:
+			A += (flags.N)?0x9A:0x66; // -0x66:0x66
+			break;
+   }
+
+   flags.S = (A & BIT_7);
+   flags.Z = !A;
+   flags.P = parity(A);
+   flags.X = A & BIT_5;
+   flags.Y = A & BIT_3;
+}
+
+*/
