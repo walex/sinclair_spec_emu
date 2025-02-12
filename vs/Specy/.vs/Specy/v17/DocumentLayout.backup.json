@@ -1,0 +1,66 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\sinclair_spec_emu\\vs\\Specy\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{B049BA6D-0EBE-4DA9-B0D0-4F738682688C}|Specy.vcxproj|C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\sinclair_spec_emu\\Macros.inc||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B049BA6D-0EBE-4DA9-B0D0-4F738682688C}|Specy.vcxproj|C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\sinclair_spec_emu\\cpu.asm||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B049BA6D-0EBE-4DA9-B0D0-4F738682688C}|Specy.vcxproj|C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\sinclair_spec_emu\\opcodesimpl_x64.inc||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "cpu.asm",
+              "DocumentMoniker": "C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\sinclair_spec_emu\\cpu.asm",
+              "RelativeDocumentMoniker": "..\\..\\cpu.asm",
+              "ToolTip": "C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\sinclair_spec_emu\\cpu.asm",
+              "RelativeToolTip": "..\\..\\cpu.asm",
+              "ViewState": "AgIAAB0HAAAAAAAAAAAIwCcHAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-02-12T03:55:38.725Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Macros.inc",
+              "DocumentMoniker": "C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\sinclair_spec_emu\\Macros.inc",
+              "RelativeDocumentMoniker": "..\\..\\Macros.inc",
+              "ToolTip": "C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\sinclair_spec_emu\\Macros.inc",
+              "RelativeToolTip": "..\\..\\Macros.inc",
+              "ViewState": "AgIAAIoAAAAAAAAAAAAAACUAAAAEAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-02-12T04:13:16.284Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "opcodesimpl_x64.inc",
+              "DocumentMoniker": "C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\sinclair_spec_emu\\opcodesimpl_x64.inc",
+              "RelativeDocumentMoniker": "..\\..\\opcodesimpl_x64.inc",
+              "ToolTip": "C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\sinclair_spec_emu\\opcodesimpl_x64.inc",
+              "RelativeToolTip": "..\\..\\opcodesimpl_x64.inc",
+              "ViewState": "AgIAAH8BAAAAAAAAAAAnwIkBAAAHAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-02-12T02:19:05.791Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

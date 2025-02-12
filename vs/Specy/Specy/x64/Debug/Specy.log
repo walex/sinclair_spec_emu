@@ -1,0 +1,10 @@
+﻿  Assembling ..\..\cpu.asm...
+  display.cpp
+  io.cpp
+  keyboard.cpp
+  opcodesimpl.cpp
+  ULA.cpp
+  WindowsTools.cpp
+  z80_main.cpp
+  Generating Code...
+  Specy.vcxproj -> C:\Users\wadrw\OneDrive\Documents\develop\projects\specy\sinclair_spec_emu\vs\Specy\x64\Debug\Specy.exe
