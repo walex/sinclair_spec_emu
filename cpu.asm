@@ -1,3 +1,4 @@
+; https://ps4star.github.io/z80studio/
 IFDEF rax
     reg_pc TEXTEQU <r10>
 	reg_si TEXTEQU <rsi>
@@ -20,7 +21,6 @@ ELSE
 	x_bp   TEXTEQU <ebp>
 	PTR_DATA_TYPE TEXTEQU <dd>
 	PTR_SIZE TEXTEQU <4>
-
 	.386
 	.model flat,stdcall
 ENDIF	
@@ -43,6 +43,96 @@ ENDIF
 
 .code
 
+InitRegisters PROC
+
+.data
+TEST_OPCODES EQU 1
+
+.code
+; params
+; regs values:PTR WORD -> rcx
+
+SetTestRegValue16 reg_pc_tmp
+SetTestRegValue16 RegSP
+SetTestRegValue8 RegA
+SetTestRegValue8 RegB
+SetTestRegValue8 RegC
+SetTestRegValue8 RegD
+SetTestRegValue8 RegE
+SetTestRegValue8 RegF
+SetTestRegValue8 RegH
+SetTestRegValue8 RegL
+SetTestRegValue8 RegI
+SetTestRegValue8 RegR
+
+; not used ei, wz
+SetTestRegValue16 ax
+SetTestRegValue16 ax
+
+SetTestRegValue16 RegIX
+SetTestRegValue16 RegIY
+
+SetTestRegValue16 RegAF_ESP
+SetTestRegValue16 RegBC_ESP
+SetTestRegValue16 RegDE_ESP
+SetTestRegValue16 RegHL_ESP
+
+SetTestRegValue8 IMF
+
+; not used p, q
+SetTestRegValue8 al
+SetTestRegValue8 al
+
+SetTestRegValue8 IFF1
+SetTestRegValue8 IFF2
+
+ret
+
+InitRegisters ENDP
+
+GetRegisters PROC
+
+; params
+; regs values:PTR WORD -> rcx
+
+GetTestRegValue16 reg_pc_tmp
+GetTestRegValue16 RegSP
+GetTestRegValue8 RegA
+GetTestRegValue8 RegB
+GetTestRegValue8 RegC
+GetTestRegValue8 RegD
+GetTestRegValue8 RegE
+GetTestRegValue8 RegF
+GetTestRegValue8 RegH
+GetTestRegValue8 RegL
+GetTestRegValue8 RegI
+GetTestRegValue8 RegR
+
+; not used ei, wz
+GetTestRegValue16 ax
+GetTestRegValue16 ax
+
+GetTestRegValue16 RegIX
+GetTestRegValue16 RegIY
+
+GetTestRegValue16 RegAF_ESP
+GetTestRegValue16 RegBC_ESP
+GetTestRegValue16 RegDE_ESP
+GetTestRegValue16 RegHL_ESP
+
+GetTestRegValue8 IMF
+
+; not used p, q
+GetTestRegValue8 al
+GetTestRegValue8 al
+
+GetTestRegValue8 IFF1
+GetTestRegValue8 IFF2
+
+ret
+
+GetRegisters ENDP
+
 IFDEF rax
 
 Z80CPU PROC
@@ -64,20 +154,40 @@ memPtr BYTE_PTR 0
 include ..\..\opcodesdef.inc  
 
 .code		
-		
-		IFDEF rax
-			mov reg_pc, rcx
-		ELSE
-			mov reg_pc, mem
-		ENDIF
-		mov memPtr, reg_pc
-		
+		IFNDEF TEST_OPCODES
+			IFDEF rax
+				mov reg_pc, rcx
+			ELSE
+				mov reg_pc, mem
+			ENDIF
+			mov memPtr, reg_pc		
 Z80Loop:
-		invoke execute_interrupts, memPtr
-		cmp HALT, 1
-		jz Op00
-		IncRegR
-		ProcesarOpcodeFromRom _TOp1B            
+			invoke execute_interrupts, memPtr
+			cmp HALT, 1
+			jz Op00
+			IncRegR
+			ProcesarOpcodeFromRom _TOp1B
+
+		ELSE
+			IFDEF rax
+				mov reg_pc, rcx
+			ELSE
+				mov reg_pc, mem
+			ENDIF
+			mov memPtr, reg_pc
+			xor x_bx, x_bx
+			mov bx, reg_pc_tmp
+			add reg_pc, x_bx
+			IncRegR
+			ProcesarOpcodeFromRom _TOp1B
+Z80Loop:
+			xor rax, rax
+			mov rax, reg_pc
+			sub rax, memPtr
+			mov reg_pc_tmp, ax
+			ret
+		ENDIF
+		            
        Op00:
 			;00		NOP			4	1	1
             nop  		

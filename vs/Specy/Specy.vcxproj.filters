@@ -1,0 +1,58 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\..\display.cpp" />
+    <ClCompile Include="..\..\io.cpp" />
+    <ClCompile Include="..\..\keyboard.cpp" />
+    <ClCompile Include="..\..\opcodesimpl.cpp" />
+    <ClCompile Include="..\..\ULA.cpp" />
+    <ClCompile Include="..\..\WindowsTools.cpp" />
+    <ClCompile Include="..\..\zx_spectrum.cpp" />
+    <ClCompile Include="..\..\kaitai\kaitaistream.cpp">
+      <Filter>katai</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\z80_test.cpp" />
+    <ClCompile Include="..\..\zx_spectrum_tap.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\display.h" />
+    <ClInclude Include="..\..\io.h" />
+    <ClInclude Include="..\..\keyboard.h" />
+    <ClInclude Include="..\..\ULA.h" />
+    <ClInclude Include="..\..\WindowsTools.h" />
+    <ClInclude Include="..\..\kaitai\custom_decoder.h">
+      <Filter>katai</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\kaitai\exceptions.h">
+      <Filter>katai</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\kaitai\kaitaistream.h">
+      <Filter>katai</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\kaitai\kaitaistruct.h">
+      <Filter>katai</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\zx_spectrum_tap.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <MASM Include="..\..\cpu.asm" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\bitops_x64.inc" />
+    <None Include="..\..\cpuregs.inc" />
+    <None Include="..\..\dirs_x64.inc" />
+    <None Include="..\..\dirs_x86.inc" />
+    <None Include="..\..\invoke.inc" />
+    <None Include="..\..\io.inc" />
+    <None Include="..\..\Macros.inc" />
+    <None Include="..\..\opcodesdef.inc" />
+    <None Include="..\..\opcodesimpl_x64.inc" />
+    <None Include="..\..\opcodesimpl_x86.inc" />
+    <None Include="..\..\bitops_x86.inc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="katai">
+      <UniqueIdentifier>{b01f16c7-3f86-418b-9d08-c4000161a6cc}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

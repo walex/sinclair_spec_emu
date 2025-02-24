@@ -108,8 +108,9 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>KS_STR_ENCODING_NONE;TEST_CPU;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>../../</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -122,8 +123,9 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>KS_STR_ENCODING_NONE;TEST_CPU;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>../../</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -135,11 +137,14 @@
   <ItemGroup>
     <ClCompile Include="..\..\display.cpp" />
     <ClCompile Include="..\..\io.cpp" />
+    <ClCompile Include="..\..\kaitai\kaitaistream.cpp" />
     <ClCompile Include="..\..\keyboard.cpp" />
     <ClCompile Include="..\..\opcodesimpl.cpp" />
     <ClCompile Include="..\..\ULA.cpp" />
     <ClCompile Include="..\..\WindowsTools.cpp" />
-    <ClCompile Include="..\..\z80_main.cpp" />
+    <ClCompile Include="..\..\z80_test.cpp" />
+    <ClCompile Include="..\..\zx_spectrum.cpp" />
+    <ClCompile Include="..\..\zx_spectrum_tap.cpp" />
   </ItemGroup>
   <ItemGroup>
     <MASM Include="..\..\cpu.asm">
@@ -160,9 +165,14 @@
   <ItemGroup>
     <ClInclude Include="..\..\display.h" />
     <ClInclude Include="..\..\io.h" />
+    <ClInclude Include="..\..\kaitai\custom_decoder.h" />
+    <ClInclude Include="..\..\kaitai\exceptions.h" />
+    <ClInclude Include="..\..\kaitai\kaitaistream.h" />
+    <ClInclude Include="..\..\kaitai\kaitaistruct.h" />
     <ClInclude Include="..\..\keyboard.h" />
     <ClInclude Include="..\..\ULA.h" />
     <ClInclude Include="..\..\WindowsTools.h" />
+    <ClInclude Include="..\..\zx_spectrum_tap.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -24,6 +24,7 @@ ENDM
 
 ProcesarOpcodeFromRom MACRO JumpTable	
 		
+	push x_bp
 	xor x_bp, x_bp
 	xor x_ax, x_ax	
 	mov al, [reg_pc]             ; Select index
@@ -31,9 +32,10 @@ ProcesarOpcodeFromRom MACRO JumpTable
 	;invoke printOpcode, reg_pc
 
 	mov x_bp, OFFSET JumpTable ; Load the base address of the jump table into RBP
-	mov x_cx, [x_bp + x_ax*PTR_SIZE]    ; Load the function address from the table
+	mov x_bx, [x_bp + x_ax*PTR_SIZE]    ; Load the function address from the table
 	inc reg_pc
-	jmp x_cx
+	pop x_bp
+	jmp x_bx
 
 ENDM
 
@@ -192,5 +194,94 @@ GetBitMask x_cx, flag
 mov ch, RegF
 and ch, cl
 test ch, ch
+
+ENDM
+
+SetTestRegValue64 MACRO reg
+
+xor rax, rax
+mov ax, WORD PTR [rcx]
+mov reg, rax
+add rcx, 2
+
+ENDM
+
+SetTestRegValue16 MACRO reg
+
+mov ax, WORD PTR [rcx]
+mov reg, ax
+add rcx, 2
+
+ENDM
+
+SetTestRegValue8 MACRO reg
+
+mov ax, WORD PTR [rcx]
+mov reg, al
+add rcx, 2
+
+ENDM
+
+GetTestRegValue64 MACRO reg
+
+mov rax, reg
+mov WORD PTR [rcx], ax
+add rcx, 2
+
+ENDM
+
+GetTestRegValue16 MACRO reg
+
+xor rax, rax
+mov ax, reg
+mov WORD PTR [rcx], ax
+add rcx, 2
+
+ENDM
+
+GetTestRegValue8 MACRO reg
+
+xor rax, rax
+mov al, reg
+mov WORD PTR [rcx], ax
+add rcx, 2
+
+ENDM
+
+Z80HFCarryFromBit11 MACRO memptr16_a, memptr16_b
+
+; (((a & 0xFFF) + (b & 0xFFF)) & 0x1000) == 0x1000
+
+ResetFlagBits HF
+mov ax, WORD PTR [memptr16_a]
+mov bx, WORD PTR [memptr16_b]
+and ax, 0FFFh
+and bx, 0FFFh
+add bx, ax
+and bx, 01000h
+shr bx, 8
+or RegF, bl
+
+ENDM
+
+Z80HFBorrowFromBit12 MACRO memptr16_a, memptr16_b, usecf
+
+ResetFlagBits HF
+mov ax, WORD PTR [memptr16_a]
+mov bx, WORD PTR [memptr16_b]
+and ax, 01FFFh
+and bx, 01FFFh
+IF usecf EQ 1
+push bx
+xor bx, bx
+mov bl, RegF
+and bl, 1
+add ax, bx
+pop bx
+ENDIF
+sub bx, ax
+and bx, 08000h
+shr bx, 11
+or RegF, bl
 
 ENDM

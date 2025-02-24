@@ -3,6 +3,7 @@
 EXTERNDEF Inst_OUT_Impl:PROC
 EXTERNDEF Inst_IN_Impl:PROC
 EXTERNDEF onDeviceIOEnd:PROC
+EXTERNDEF Inst_DAA_C:PROC
 
 .code
 
@@ -376,6 +377,23 @@ Inst_DEC8 ENDP
 
 Inst_DAA PROC
 
+push reg_pc
+push reg_si
+push x_bp
+push x_cx
+push x_dx
+invoke Inst_DAA_C, OFFSET RegA, OFFSET RegF
+pop x_dx
+pop x_cx
+pop x_bp
+pop reg_si
+pop reg_pc
+ret
+
+Inst_DAA ENDP
+
+Inst_DAA_OLD PROC
+
 mov ah, 0
 Inst_DAA_step1:
 mov al, RegA
@@ -462,7 +480,7 @@ X86FlagsToZ80Flags SF, ZF, PVF
 mov RegA, al
 ret
 
-Inst_DAA ENDP
+Inst_DAA_OLD ENDP
 
 Inst_CPL PROC
 
@@ -509,9 +527,10 @@ Inst_ADD16 PROC
 ; Reg_Ori:PTR WORD -> x_cx
 ; Reg_Dest:PTR WORD -> x_dx
 
+Z80HFCarryFromBit11 x_cx, x_dx
 mov bx, WORD PTR [x_cx]
 add WORD PTR [x_dx],bx
-X86FlagsToZ80Flags HF, CF
+X86FlagsToZ80Flags CF
 ResetFlagBits NF
 ret
 
@@ -522,10 +541,12 @@ Inst_ADC16 PROC
 ; parameters
 ; Reg_Ori:PTR WORD -> x_cx
 
+mov x_dx, OFFSET RegHL
+Z80HFCarryFromBit11 x_cx, x_dx
 LoadZ80CarryFlag
 mov ax, WORD PTR [x_cx]	
 adc RegHL,ax
-X86FlagsToZ80Flags SF, ZF, HF, OF, CF
+X86FlagsToZ80Flags SF, HF, ZF, OF, CF
 ResetFlagBits NF
 ret
 
@@ -536,10 +557,12 @@ Inst_SBC16 PROC
 ; parameters
 ; Reg_Ori:PTR WORD -> x_cx
 
+mov x_dx, OFFSET RegHL
+Z80HFBorrowFromBit12 x_cx, x_dx, 1
 LoadZ80CarryFlag
 mov ax,WORD PTR [x_cx]	
 sbb RegHL,ax
-X86FlagsToZ80Flags SF, ZF, HF, OF, CF
+X86FlagsToZ80Flags SF, HF, ZF, OF, CF
 SetFlagBits NF
 ret
 
@@ -960,7 +983,7 @@ Inst_IN PROC
 
 push reg_pc
 push reg_si
-push rbp
+push x_bp
 push x_dx
 invoke Inst_IN_Impl, cx, x_dx
 mov al, [x_dx]
@@ -968,7 +991,7 @@ test al, al
 X86FlagsToZ80Flags SF, ZF, PVF
 ResetFlagBits HF, NF
 pop x_dx
-pop rbp
+pop x_bp
 pop reg_si
 pop reg_pc
 ret
@@ -1049,9 +1072,9 @@ Inst_OUT PROC
 
 push reg_pc
 push reg_si
-push rbp
+push x_bp
 invoke Inst_OUT_Impl, cx, dl
-pop rbp
+pop x_bp
 pop reg_si
 pop reg_pc
 ret

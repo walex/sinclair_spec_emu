@@ -104,7 +104,8 @@
    _CPU ENDS		
 
    Reg_Tmp PTR_DATA_TYPE 0	 
-   
+   reg_pc_tmp dw 0
+
     OF EQU 11	; x86 oferflow flag
 
 	SF EQU 7	;Bit 7 - Sign flag
