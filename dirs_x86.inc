@@ -50,7 +50,7 @@ movsx x_ax,BYTE PTR [reg_pc]
 add reg_si,x_ax
 mov reg_di,memPtr
 add reg_di,reg_si
-inc reg_pc
+ADD_REG_PC memPtr, 1
 ret
 
 DIR_INDEXADO ENDP

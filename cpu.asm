@@ -46,7 +46,7 @@ ENDIF
 InitRegisters PROC
 
 .data
-TEST_OPCODES EQU 1
+;TEST_OPCODES EQU 1
 
 .code
 ; params
@@ -195,7 +195,7 @@ Z80Loop:
             jmp Z80Loop
        Op01:
 			;01 n n		LD BC,nn		10	2	
-			invoke DIR_INMEDIATO_EXT			
+			invoke DIR_INMEDIATO_EXT, memPtr			
             invoke Inst_LD16,reg_di,OFFSET RegBC            			
 			EmulateOpcodeTime 10,2
             jmp Z80Loop
@@ -222,7 +222,7 @@ Z80Loop:
 			jmp Z80Loop
        Op06:
 			;06 n		LD B,n			7	2	
-			invoke DIR_INMEDIATO			
+			invoke DIR_INMEDIATO, memPtr			
             invoke Inst_LD8,reg_di,OFFSET RegB			
 			EmulateOpcodeTime 7,2
 			jmp Z80Loop
@@ -264,7 +264,7 @@ Z80Loop:
 			jmp Z80Loop
        Op0E:
 			;0E n		LD C,n			7	2	
-			invoke DIR_INMEDIATO			
+			invoke DIR_INMEDIATO, memPtr			
             invoke Inst_LD8,reg_di,OFFSET RegC			
 			EmulateOpcodeTime 7,2
 			jmp Z80Loop
@@ -277,12 +277,12 @@ Z80Loop:
 			;10 e		DJNZ (PC+e)		8/13	2/3	1/1	(met/not met)
 			dec RegB			
 			jnz Op18
-			inc reg_pc	
+			INC_REG_PC memPtr	
 			EmulateOpcodeTime 8,2					
 			jmp Z80Loop
        Op11:
 			;11 n n		LD DE,nn		10	2	
-			invoke DIR_INMEDIATO_EXT							
+			invoke DIR_INMEDIATO_EXT, memPtr							
             invoke Inst_LD16,reg_di,OFFSET RegDE            												
 			EmulateOpcodeTime 10,2
             jmp Z80Loop
@@ -309,7 +309,7 @@ Z80Loop:
 			jmp Z80Loop	
        Op16:
 			;16 n		LD D,n			7	2	
-			invoke DIR_INMEDIATO			
+			invoke DIR_INMEDIATO, memPtr			
             invoke Inst_LD8,reg_di,OFFSET RegD
 			EmulateOpcodeTime 7,2
 			jmp Z80Loop
@@ -351,7 +351,7 @@ Z80Loop:
 			jmp Z80Loop
        Op1E:
 			;1E n		LD E,n			7	2	
-			invoke DIR_INMEDIATO			
+			invoke DIR_INMEDIATO, memPtr			
             invoke Inst_LD8,reg_di,OFFSET RegE
 			EmulateOpcodeTime 7,2
 			jmp Z80Loop
@@ -364,18 +364,18 @@ Z80Loop:
 			;20 e		JR NZ,(PC+e)		12/7	3/2	1/1	(met/not met)						
 			test RegF,40h
 			jz Op18
-			inc reg_pc			
+			INC_REG_PC memPtr			
 			EmulateOpcodeTime 7,2
 			jmp Z80Loop
        Op21:
 			;21 n n		LD HL,nn		10	2	
-			invoke DIR_INMEDIATO_EXT			
+			invoke DIR_INMEDIATO_EXT, memPtr			
             invoke Inst_LD16,reg_di,OFFSET RegHL            
 			EmulateOpcodeTime 10,2
             jmp Z80Loop
        Op22:
 			;22 n n		LD (nn),HL		16	5	
-			invoke DIR_EXT	   	 	   	  	  	  
+			invoke DIR_EXT, memPtr	   	 	   	  	  	  
 			invoke DIR_REGISTRO_INDIRECTO,memPtr,di
 			invoke Inst_LD16,OFFSET RegHL,reg_di	
 			EmulateOpcodeTime 16,5
@@ -397,7 +397,7 @@ Z80Loop:
 			jmp Z80Loop
        Op26:
 			;26 n		LD H,n			7	2	
-			invoke DIR_INMEDIATO			
+			invoke DIR_INMEDIATO, memPtr			
             invoke Inst_LD8,reg_di,OFFSET RegH
 			EmulateOpcodeTime 7,2
 			jmp Z80Loop
@@ -410,7 +410,7 @@ Z80Loop:
 			;28 e		JR Z,(PC+e)		12/7	3/2	1/1	(met/not met)
 			test RegF,40h
 			jnz Op18
-			inc reg_pc
+			INC_REG_PC memPtr
 			EmulateOpcodeTime 7,3
 			jmp Z80Loop
        Op29:
@@ -420,7 +420,7 @@ Z80Loop:
 			jmp Z80Loop
        Op2A:
 			;2A n n		LD HL,(nn)		16	5	
-			invoke DIR_EXT
+			invoke DIR_EXT, memPtr
 			add reg_di,memPtr	 						
 			invoke Inst_LD16,reg_di,OFFSET RegHL	
 			EmulateOpcodeTime 16,5
@@ -442,7 +442,7 @@ Z80Loop:
 			jmp Z80Loop
        Op2E:
 			;2E n		LD L,n			7	2	
-			invoke DIR_INMEDIATO			
+			invoke DIR_INMEDIATO, memPtr			
             invoke Inst_LD8,reg_di,OFFSET RegL
 			EmulateOpcodeTime 7,2
 			jmp Z80Loop
@@ -455,19 +455,19 @@ Z80Loop:
 			;30 e		JR NC,(PC+e)		12/7	3/2	1/1	(met/not met)
 			test RegF,1
 			jz Op18
-			inc reg_pc
+			INC_REG_PC memPtr
 			EmulateOpcodeTime 7,2
 			jmp Z80Loop
 
        Op31:
 			;31 n n		LD SP,nn		10	2	
-			invoke DIR_INMEDIATO_EXT			
+			invoke DIR_INMEDIATO_EXT, memPtr			
             invoke Inst_LD16,reg_di,OFFSET RegSP            
 			EmulateOpcodeTime 10,2
             jmp Z80Loop	
        Op32:
 			;32 n n		LD (nn),A		13	4				
-			invoke DIR_EXT	   	 	   	  	  	  
+			invoke DIR_EXT, memPtr	   	 	   	  	  	  
 			invoke DIR_REGISTRO_INDIRECTO,memPtr,di
 			invoke Inst_LD8,OFFSET RegA,reg_di	
 			EmulateOpcodeTime 13,4
@@ -493,7 +493,7 @@ Z80Loop:
 			;36 n		LD (HL),n		10	3	
 			invoke DIR_REGISTRO_INDIRECTO,memPtr,RegHL
 			mov reg_si, reg_di
-			invoke DIR_INMEDIATO
+			invoke DIR_INMEDIATO, memPtr
 			mov al,RegF
 			push ax
 			invoke Inst_LD8,reg_di,reg_si
@@ -510,7 +510,7 @@ Z80Loop:
 			;38 e		JR C,(PC+e)		12/7	3/2	1/1	(met/not met)
 			test RegF,1
 			jnz Op18
-			inc reg_pc
+			INC_REG_PC memPtr
 			EmulateOpcodeTime 7,2
 			jmp Z80Loop
        Op39:
@@ -520,7 +520,7 @@ Z80Loop:
 			jmp Z80Loop
        Op3A:
 			;3A n n		LD A,(nn)		13	4	
-			invoke DIR_EXT
+			invoke DIR_EXT, memPtr
 			add reg_di,memPtr  	  	  	  
 			invoke Inst_LD8,reg_di,OFFSET RegA	
 			EmulateOpcodeTime 13,4
@@ -542,7 +542,7 @@ Z80Loop:
 			jmp Z80Loop
        Op3E:
 			;3E n		LD A,n			7	2	
-			invoke DIR_INMEDIATO			
+			invoke DIR_INMEDIATO, memPtr			
             invoke Inst_LD8,reg_di,OFFSET RegA
 			EmulateOpcodeTime 7,2
 			jmp Z80Loop
@@ -1248,12 +1248,12 @@ Z80Loop:
 			;C2 n n		JP NZ,(nn)		10	3	1	(met or not)
 			test RegF,40h			
 			jz OpC3
-			add reg_pc,2h			
+			ADD_REG_PC memPtr, 2			
 			EmulateOpcodeTime 10,3
 			jmp Z80Loop
        OpC3:
 			;C3 n n		JP (nn)			10	3	1
-			invoke DIR_INMEDIATO_EXT			
+			invoke DIR_INMEDIATO_EXT, memPtr			
 			invoke Inst_JP,memPtr,WORD PTR[reg_di]
 			EmulateOpcodeTime 10,3
 			jmp Z80Loop
@@ -1261,7 +1261,7 @@ Z80Loop:
 			;C4 n n		CALL NZ,(nn)		17/10	5/3	1/1	(met/not met)
 			test RegF,40h
 			jz OpCD
-			add reg_pc,2h
+			ADD_REG_PC memPtr, 2
 			EmulateOpcodeTime 10,3
 			jmp Z80Loop
        OpC5:
@@ -1271,7 +1271,7 @@ Z80Loop:
 			jmp Z80Loop	
        OpC6:
 			;C6 n		ADD A,n			7	2	1
-			invoke DIR_INMEDIATO
+			invoke DIR_INMEDIATO, memPtr
 			invoke Inst_ADD8,reg_di
 			EmulateOpcodeTime 7,2
 			jmp Z80Loop
@@ -1296,7 +1296,7 @@ Z80Loop:
 			;CA n n		JP Z,(nn)		10	3	1	(always same)
 			test RegF,40h
 			jnz OpC3
-			add reg_pc,2h
+			ADD_REG_PC memPtr, 2
 			EmulateOpcodeTime 10,3
 			jmp Z80Loop
        OpCB:									
@@ -1306,18 +1306,18 @@ Z80Loop:
 			;CC n n		CALL Z,(nn)		17/10	5/3	1/1	(met/not met)
 			test RegF,40h
 			jnz OpCD
-			add reg_pc,2h
+			ADD_REG_PC memPtr, 2
 			EmulateOpcodeTime 10,3
 			jmp Z80Loop
        OpCD:
 			;CD n n		CALL (nn)		17	5	1
-			invoke DIR_INMEDIATO_EXT			
+			invoke DIR_INMEDIATO_EXT, memPtr			
 			invoke Inst_CALL,memPtr,WORD PTR[reg_di]			
 			EmulateOpcodeTime 17,5
 			jmp Z80Loop	
        OpCE:
 			;CE n		ADC A,n			7	2	1
-			invoke DIR_INMEDIATO
+			invoke DIR_INMEDIATO, memPtr
 			invoke Inst_ADC8,reg_di
 			EmulateOpcodeTime 7,2
 			jmp Z80Loop
@@ -1342,13 +1342,13 @@ Z80Loop:
 			;D2 n n		JP NC,(nn)		10	3	1	(met or not)
 			test RegF,1h
 			jz OpC3
-			add reg_pc,2h
+			ADD_REG_PC memPtr, 2
 			EmulateOpcodeTime 10,3
 			jmp Z80Loop
 
        OpD3: 
 			; D3 OUT (n),A	11	3
-			invoke DIR_INMEDIATO
+			invoke DIR_INMEDIATO, memPtr
 			xor x_bx, x_bx
 			mov bl, [reg_di]
 			mov bh, RegA
@@ -1359,7 +1359,7 @@ Z80Loop:
 			;D4 n n		CALL NC,(nn)		17/10	5/3	1/1	(met/not met)
 			test RegF,1h
 			jz OpCD
-			add reg_pc,2h
+			ADD_REG_PC memPtr, 2
 			EmulateOpcodeTime 10,3
 			jmp Z80Loop
        OpD5:
@@ -1369,7 +1369,7 @@ Z80Loop:
 			jmp Z80Loop
        OpD6:
 			;D6 n		SUB n			7	2	1
-			invoke DIR_INMEDIATO		
+			invoke DIR_INMEDIATO, memPtr		
 			invoke Inst_SUB,reg_di
 			EmulateOpcodeTime 7,2
 			jmp Z80Loop
@@ -1393,12 +1393,12 @@ Z80Loop:
 			;DA n n		JP C,(nn)		10	3	1	(met or not)
 			test RegF,1h
 			jnz OpC3
-			add reg_pc,2h
+			ADD_REG_PC memPtr, 2
 			EmulateOpcodeTime 10,3
 			jmp Z80Loop
        OpDB:
 			; DB IN A, (n) 			11	3
-			invoke DIR_INMEDIATO
+			invoke DIR_INMEDIATO, memPtr
 			xor x_ax, x_ax
 			mov al, [reg_di]
 			mov ah, RegA
@@ -1409,7 +1409,7 @@ Z80Loop:
 			;DC n n		CALL C,(nn)		17/10	5/3	1			
 			test RegF,1h
 			jnz OpCD
-			add reg_pc,2h
+			ADD_REG_PC memPtr, 2
 			EmulateOpcodeTime 10,3
 			jmp Z80Loop
        OpDD:
@@ -1417,7 +1417,7 @@ Z80Loop:
 			ProcesarOpcodeFromRom _TOpDD
        OpDE:
 			;DE n		SBC A,n 7 2
-			invoke DIR_INMEDIATO
+			invoke DIR_INMEDIATO, memPtr
 			invoke Inst_SBC8,reg_di
 			EmulateOpcodeTime 7,2
 			jmp Z80Loop
@@ -1441,7 +1441,7 @@ Z80Loop:
 			;E2 n n		JP PO,(nn) 10 3
 			test RegF,4h
 			jz OpC3
-			add reg_pc,2h
+			ADD_REG_PC memPtr, 2
 			EmulateOpcodeTime 10,3
 			jmp Z80Loop
 
@@ -1455,7 +1455,7 @@ Z80Loop:
 			;E4 n n		CALL PO,(nn) 10 3			
 			test RegF,4h
 			jz OpCD
-			add reg_pc,2h
+			ADD_REG_PC memPtr, 2
 			EmulateOpcodeTime 10,3
 			jmp Z80Loop
        OpE5:
@@ -1465,7 +1465,7 @@ Z80Loop:
 			jmp Z80Loop
        OpE6:
 			;E6 n		AND n	7 2		
-			invoke DIR_INMEDIATO
+			invoke DIR_INMEDIATO, memPtr
 			invoke Inst_AND,BYTE PTR [reg_di]
 			EmulateOpcodeTime 7,2
 			jmp Z80Loop
@@ -1491,7 +1491,7 @@ Z80Loop:
 			;EA n n		JP PE,(nn) 10 3
 			test RegF,4h
 			jnz OpC3
-			add reg_pc,2h
+			ADD_REG_PC memPtr, 2
 			EmulateOpcodeTime 10,3
 			jmp Z80Loop
        OpEB:
@@ -1503,7 +1503,7 @@ Z80Loop:
 			;EC n n		CALL PE,(nn) 17 5
 			test RegF,4h
 			jnz OpCD
-			add reg_pc,2h
+			ADD_REG_PC memPtr, 2
 			EmulateOpcodeTime 17,5
 			jmp Z80Loop
        OpED:			
@@ -1527,7 +1527,7 @@ Z80Loop:
 			  jmp Z80Loop	
        OpED43:
 			  ;ED43 n n	LD (nn),BC	10 6 
-			  invoke DIR_EXT	   	 			    	  	  	  
+			  invoke DIR_EXT, memPtr	   	 			    	  	  	  
 			  invoke DIR_REGISTRO_INDIRECTO,memPtr,di
 			  invoke Inst_LD16,OFFSET RegBC,reg_di				  
 			  EmulateOpcodeTime 20,6
@@ -1572,7 +1572,7 @@ Z80Loop:
 				jmp Z80Loop
        OpED4B:
 			  ;ED4B n n	LD BC,(nn) 20 6 
-			  invoke DIR_EXT
+			  invoke DIR_EXT, memPtr
 			  add reg_di,memPtr	 	   	  	  	  
 			  invoke Inst_LD16,reg_di,OFFSET RegBC
 			  EmulateOpcodeTime 20,6
@@ -1616,7 +1616,7 @@ Z80Loop:
 			  jmp Z80Loop
        OpED53:
 			  ;ED53 n n	LD (nn),DE 20 6 
-			  invoke DIR_EXT	   	 	   	  	  	  
+			  invoke DIR_EXT, memPtr	   	 	   	  	  	  
 			  invoke DIR_REGISTRO_INDIRECTO,memPtr,di
 		      invoke Inst_LD16,OFFSET RegDE,reg_di	
 			  EmulateOpcodeTime 20,6
@@ -1663,7 +1663,7 @@ Z80Loop:
 
        OpED5B:
 		      ;ED5B n n	LD DE,(nn)	20 6 
-			  invoke DIR_EXT
+			  invoke DIR_EXT, memPtr
 			  add reg_di,memPtr	 	   	  	  	  
 			  invoke Inst_LD16,reg_di,OFFSET RegDE
 			  EmulateOpcodeTime 20,6
@@ -1709,7 +1709,7 @@ Z80Loop:
 			jmp Z80Loop
        OpED63:
 			;ED63 n n	LD (nn),HL		16	5
-			invoke DIR_EXT	   	 	   	  	  	  
+			invoke DIR_EXT, memPtr	   	 	   	  	  	  
 			invoke DIR_REGISTRO_INDIRECTO,memPtr,di
 			invoke Inst_LD16,OFFSET RegHL,reg_di	
 			EmulateOpcodeTime 16,5
@@ -1754,7 +1754,7 @@ Z80Loop:
 			  jmp Z80Loop
        OpED6B:
 			  ;ED6B n n	LD HL,(nn) 16 5 
-			  invoke DIR_EXT
+			  invoke DIR_EXT, memPtr
 			  add reg_di,memPtr	 	   	  	  	  
 			  invoke Inst_LD16,reg_di,OFFSET RegHL	
 			  EmulateOpcodeTime 16,5
@@ -1799,7 +1799,7 @@ Z80Loop:
 			  jmp Z80Loop	
        OpED73:
 			  ;ED73 n n	LD (nn),SP	20 6 
-			  invoke DIR_EXT	   	 	   	  	  	  
+			  invoke DIR_EXT, memPtr	   	 	   	  	  	  
 			  invoke DIR_REGISTRO_INDIRECTO,memPtr,di
 			  invoke Inst_LD16,OFFSET RegSP,reg_di	
 			  EmulateOpcodeTime 20,6
@@ -1840,7 +1840,7 @@ Z80Loop:
 
        OpED7B:
 			   ;ED7B n n	LD SP,(nn) 20 6 
-			   invoke DIR_EXT
+			   invoke DIR_EXT, memPtr
 			   add reg_di,memPtr	 	   	  	  	  
 			   invoke Inst_LD16,reg_di,OFFSET RegSP
 			   EmulateOpcodeTime 20,6
@@ -1944,7 +1944,7 @@ Z80Loop:
 			  jmp Z80Loop
        OpEE:
 			;EE n		XOR n 7 2
-			invoke DIR_INMEDIATO
+			invoke DIR_INMEDIATO, memPtr
 			invoke Inst_XOR,BYTE PTR [reg_di]
 			EmulateOpcodeTime 7,2
 			jmp Z80Loop
@@ -1968,7 +1968,7 @@ Z80Loop:
 			;F2 n n		JP P,(nn) 10 3 
 			test RegF,80h
 			jz OpC3
-			add reg_pc,2h
+			ADD_REG_PC memPtr, 2
 			EmulateOpcodeTime 10,3
 			jmp Z80Loop
        OpF3:	   
@@ -1982,7 +1982,7 @@ Z80Loop:
 			;F4 n n		CALL P,(nn) 17 5
 			test RegF,80h
 			jz OpCD
-			add reg_pc,2h
+			ADD_REG_PC memPtr, 2
 			EmulateOpcodeTime 17,5
 			jmp Z80Loop
        OpF5:
@@ -1992,7 +1992,7 @@ Z80Loop:
 			jmp Z80Loop
        OpF6:
 			;F6 n		OR n 7 2
-			invoke DIR_INMEDIATO
+			invoke DIR_INMEDIATO, memPtr
 			invoke Inst_OR,BYTE PTR [reg_di]
 			EmulateOpcodeTime 7,2
 			jmp Z80Loop
@@ -2016,7 +2016,7 @@ Z80Loop:
 			;FA n n		JP M,(nn) 10 3
 			test RegF,80h
 			jnz OpC3
-			add reg_pc,2h
+			ADD_REG_PC memPtr, 2
 			EmulateOpcodeTime 10,3
 			jmp Z80Loop
        OpFB:
@@ -2029,7 +2029,7 @@ Z80Loop:
 			;FC n n		CALL M,(nn) 17 5
 			test RegF,80h
 			jnz OpCD
-			add reg_pc,2h
+			ADD_REG_PC memPtr, 2
 			EmulateOpcodeTime 17,5
 			jmp Z80Loop
        OpFD:
@@ -2037,7 +2037,7 @@ Z80Loop:
 			ProcesarOpcodeFromRom _TOpFD
        OpFE:
 			;FE n		CP n 7 2
-			invoke DIR_INMEDIATO
+			invoke DIR_INMEDIATO, memPtr
 			invoke Inst_CP,reg_di
 			EmulateOpcodeTime 7,2
 			jmp Z80Loop
@@ -3449,7 +3449,7 @@ Z80Loop:
 
        OpCBF8:
 			  ;CBF8		SET 7,B			8	2	2
-			  invoke Inst_Set,OFFSET RegL,7
+			  invoke Inst_Set,OFFSET RegB,7
 			  EmulateOpcodeTime 8,2
 			  jmp Z80Loop	
        OpCBF9:
@@ -3502,13 +3502,13 @@ Z80Loop:
 			  jmp Z80Loop
        OpDD21:
 			  ;DD21 n n	LD IX,nn 14 4 
-			  invoke DIR_INMEDIATO_EXT
+			  invoke DIR_INMEDIATO_EXT, memPtr
 			  invoke Inst_LD16,reg_di,OFFSET RegIX
 			  EmulateOpcodeTime 14,4
 			  jmp Z80Loop
        OpDD22:
 			  ;DD22 n n	LD (nn),IX 20 6 
-			  invoke DIR_EXT	   	 	   	  	  	  
+			  invoke DIR_EXT, memPtr	   	 	   	  	  	  
 			  invoke DIR_REGISTRO_INDIRECTO,memPtr,di
 			  invoke Inst_LD16,OFFSET RegIX,reg_di	
 			  EmulateOpcodeTime 20,6
@@ -3530,7 +3530,7 @@ Z80Loop:
 			 jmp Z80Loop
        OpDD26:
 			;26 n		LD   IXH,n			11	3
-			invoke DIR_INMEDIATO			
+			invoke DIR_INMEDIATO, memPtr			
             invoke Inst_LD8,reg_di, OFFSET RegIXH
 			EmulateOpcodeTime 11,3
 			jmp Z80Loop	
@@ -3541,7 +3541,7 @@ Z80Loop:
 			  jmp Z80Loop
        OpDD2A:
 			  ;DD2A n n	LD IX,(nn) 20 6 
-			  invoke DIR_EXT
+			  invoke DIR_EXT, memPtr
 			  add reg_di,memPtr	 	   	  	  	  
 			  invoke Inst_LD16,reg_di,OFFSET RegIX
 			  EmulateOpcodeTime 20,6
@@ -3563,7 +3563,7 @@ Z80Loop:
 			 jmp Z80Loop
        OpDD2E:
 			 ;OpDD2E LD   IXL,n	 11 3
-			 invoke DIR_INMEDIATO			
+			 invoke DIR_INMEDIATO, memPtr			
              invoke Inst_LD8,reg_di,OFFSET RegIXL
 			 EmulateOpcodeTime 11,3
 			 jmp Z80Loop			 
@@ -3584,7 +3584,7 @@ Z80Loop:
 			  ;DD36 d n	LD (IX+d),n 19 5
 			   invoke DIR_INDEXADO,memPtr,RegIX
 			   mov reg_si, reg_di
-			   invoke DIR_INMEDIATO
+			   invoke DIR_INMEDIATO, memPtr
 			   invoke Inst_LD8,reg_di,reg_si
 			   EmulateOpcodeTime 19,5
 			   jmp Z80Loop
@@ -4310,13 +4310,13 @@ Z80Loop:
 			  jmp Z80Loop
        OpFD21:
 			  ;FD21 n n	LD IY,nn 14 4 
-			  invoke DIR_INMEDIATO_EXT
+			  invoke DIR_INMEDIATO_EXT, memPtr
 			  invoke Inst_LD16,reg_di,OFFSET RegIY
 			  EmulateOpcodeTime 14,4
 			  jmp Z80Loop
        OpFD22:
 			  ;FD22 n n	LD (nn),IY 20 6 
-			  invoke DIR_EXT	   	 	   	  	  	  
+			  invoke DIR_EXT, memPtr	   	 	   	  	  	  
 			  invoke DIR_REGISTRO_INDIRECTO,memPtr,di
 			  invoke Inst_LD16,OFFSET RegIY,reg_di	
 			  EmulateOpcodeTime 20,6
@@ -4338,7 +4338,7 @@ Z80Loop:
 			 jmp Z80Loop
        OpFD26:
 			;FD26 n		LD   IYH,n			11	3
-			invoke DIR_INMEDIATO			
+			invoke DIR_INMEDIATO, memPtr			
             invoke Inst_LD8,reg_di, OFFSET RegIYH
 			EmulateOpcodeTime 11,3
 			jmp Z80Loop	
@@ -4349,7 +4349,7 @@ Z80Loop:
 			  jmp Z80Loop	
        OpFD2A:
 			  ;FD2A n n	LD IY,(nn) 20 6 
-			  invoke DIR_EXT
+			  invoke DIR_EXT, memPtr
 			  add reg_di,memPtr	 	   	  	  	  
 			  invoke Inst_LD16,reg_di,OFFSET RegIY	
 			  EmulateOpcodeTime 20,6
@@ -4371,7 +4371,7 @@ Z80Loop:
 			 jmp Z80Loop
        OpFD2E:
 			 ;FD2E LD   IYL,n	 11	3
-			 invoke DIR_INMEDIATO			
+			 invoke DIR_INMEDIATO, memPtr			
              invoke Inst_LD8,reg_di,OFFSET RegIYL
 			 EmulateOpcodeTime 11,3
 			 jmp Z80Loop			 
@@ -4391,7 +4391,7 @@ Z80Loop:
 			 ;FD36 d n	LD (IY+d),n 19  5 0
 			 invoke DIR_INDEXADO,memPtr,RegIY
 			 mov reg_si, reg_di
-			 invoke DIR_INMEDIATO
+			 invoke DIR_INMEDIATO, memPtr
 			 invoke Inst_LD8,reg_di,reg_si
 			 EmulateOpcodeTime 19,50
 			 jmp Z80Loop

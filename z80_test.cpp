@@ -323,9 +323,9 @@ int run_test_cases() {
 
 		static int op_cnt = 0;
 		++op_cnt;
-		if (op_cnt == 51107)
+		if (op_cnt == 468001)
 			op_cnt = op_cnt;
-
+		
 		std::vector<unsigned short int> parameters;
 		parameters.reserve((REGISTERS_COUNT * 2) + 10);
 		memset(mem, 0, ROM_128K_SIZE);

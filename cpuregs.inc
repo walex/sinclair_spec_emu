@@ -101,9 +101,13 @@
 	 A_LINE		dw  0
 	 HALT		db  0
 
+	 Reg_Tmp PTR_DATA_TYPE 0
+
    _CPU ENDS		
 
-   Reg_Tmp PTR_DATA_TYPE 0	 
+   ;Reg_Tmp PTR_DATA_TYPE 0	 
+   
+
    reg_pc_tmp dw 0
 
     OF EQU 11	; x86 oferflow flag
@@ -176,3 +180,5 @@ INT_LINE EQU [Z80_CPU.INT_LINE]
 D_LINE EQU [Z80_CPU.D_LINE]
 A_LINE EQU [Z80_CPU.A_LINE]
 HALT EQU [Z80_CPU.HALT]
+
+Reg_Tmp EQU [Z80_CPU.Reg_Tmp]

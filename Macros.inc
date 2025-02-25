@@ -1,5 +1,23 @@
 .code
 
+INC_REG_PC MACRO mem
+
+ADD_REG_PC mem, 1
+
+ENDM
+
+ADD_REG_PC MACRO mem, value
+
+push x_ax	
+mov x_ax, reg_pc
+sub x_ax, mem
+add ax, value
+mov reg_pc, mem
+add reg_pc, x_ax
+pop x_ax
+
+ENDM
+
 EmulateOpcodeTime MACRO Estados, Ciclos, uSecs
 
 ENDM
@@ -33,7 +51,7 @@ ProcesarOpcodeFromRom MACRO JumpTable
 
 	mov x_bp, OFFSET JumpTable ; Load the base address of the jump table into RBP
 	mov x_bx, [x_bp + x_ax*PTR_SIZE]    ; Load the function address from the table
-	inc reg_pc
+	INC_REG_PC memPtr
 	pop x_bp
 	jmp x_bx
 

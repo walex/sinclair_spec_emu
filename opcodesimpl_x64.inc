@@ -265,8 +265,8 @@ Inst_ADC8 PROC
 ; parameters
 ; Reg_Ori:PTR BYTE -> x_cx
 
-LoadZ80CarryFlag
 mov al,[x_cx]	
+LoadZ80CarryFlag
 adc RegA, al
 X86FlagsToZ80Flags SF, ZF, HF, OF, CF
 ResetFlagBits NF
@@ -306,10 +306,11 @@ Inst_AND PROC
 ; parameters
 ; Valor:BYTE -> cl
 
+ResetFlagBits SF, ZF, NF, PVF, CF
 and RegA,cl
-X86FlagsToZ80Flags SF, ZF, OF
+X86FlagsToZ80Flags SF, ZF, PVF
 SetFlagBits HF
-ResetFlagBits NF, CF
+mov al, RegF
 ret
 
 Inst_AND ENDP
@@ -319,9 +320,9 @@ Inst_OR PROC
 ; parameters
 ; Valor:BYTE -> cl
 
+ResetFlagBits SF, ZF, HF, NF, PVF, CF
 or RegA,cl
-X86FlagsToZ80Flags SF, ZF, OF
-ResetFlagBits HF, NF, CF
+X86FlagsToZ80Flags SF, ZF, PVF
 ret
 
 Inst_OR ENDP
@@ -501,14 +502,13 @@ Inst_NEG ENDP
 
 Inst_CCF PROC
 
-mov ah, RegF
+ResetFlagBits NF, HF
 GetBitMask x_cx, CF
-sahf
-setc ah
+mov ah, RegF
+and ah, cl
 shl ah, HF
-xor RegF, cl
+xor RegF, 1
 or RegF, ah
-ResetFlagBits NF
 ret
 
 Inst_CCF ENDP
@@ -712,14 +712,24 @@ Inst_SLL PROC
 
 ; parameters
 ; Reg:PTR BYTE -> x_cx
+; S and Z by definition,
+;H and N reset, ;
+;C from bit 7, P/V set if result is even.
+
+ResetFlagBits HF, NF, CF
 
 mov bl,[x_cx]
+mov dl, bl
+and dl, 080h
+shr dl, 7
+
 sal bl,1
+or bl, 1
 mov [x_cx],bl
-X86FlagsToZ80Flags CF
 test bl, bl
 X86FlagsToZ80Flags SF, ZF, PVF
-ResetFlagBits HF, NF
+or RegF, dl
+
 ret
 
 Inst_SLL ENDP
@@ -833,20 +843,52 @@ Inst_BIT PROC
 ; Reg:PTR BYTE -> x_cx
 ; Idx:BYTE -> dl
 
+
+ResetFlagBits SF, ZF, NF, PVF
+SetFlagBits HF
+
 xor  ax, ax
 mov al, [x_cx]
-ResetFlagBits ZF, NF
-SetFlagBits HF
-xor cx, cx
+mov bl, al
 mov cl, dl
-bt ax, cx
+GetBitMask x_cx, cl
+and al, cl
+xor al, cl
+mov cl, dl
+shr al, cl
+shl al, ZF
+or RegF, al
+; undoc PVF behaviour
+shr al, ZF-PVF
+or RegF, al
+; undoc SF behaviour
+mov cl, dl
+sub dl, 7
+GetBitMask x_cx, cl
+and bl, cl
+xor bl, cl
+add dl, bl
 lahf
-GetBitMask x_cx, CF
+GetBitMask x_cx, ZF
 and ah, cl
-xor ah, cl
-shl ah, ZF-CF
+shl ah, SF-ZF
 or RegF, ah
 ret
+
+;xor  ax, ax
+;mov al, [x_cx]
+;ResetFlagBits ZF, NF
+;SetFlagBits HF
+;xor cx, cx
+;mov cl, dl
+;bt ax, cx
+;lahf
+;GetBitMask x_cx, CF
+;and ah, cl
+;xor ah, cl
+;shl ah, ZF-CF
+;or RegF, ah
+;ret
 
 Inst_BIT ENDP
 

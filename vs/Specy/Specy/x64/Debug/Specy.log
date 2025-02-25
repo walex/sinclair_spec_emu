@@ -1,13 +1,2 @@
-﻿  Assembling ..\..\cpu.asm...
-  display.cpp
-  io.cpp
-  kaitaistream.cpp
-  keyboard.cpp
-  opcodesimpl.cpp
-  ULA.cpp
-  WindowsTools.cpp
-  z80_test.cpp
-  zx_spectrum.cpp
-  zx_spectrum_tap.cpp
-  Generating Code...
+﻿  zx_spectrum.cpp
   Specy.vcxproj -> C:\Users\wadrw\OneDrive\Documents\develop\projects\specy\sinclair_spec_emu\vs\Specy\x64\Debug\Specy.exe

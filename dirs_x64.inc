@@ -2,41 +2,53 @@
 
 DIR_INMEDIATO PROC 
 
+; parameters 
+; memPtr -> x_cx
+
 xor x_ax,x_ax
 mov al,[reg_pc]                
 mov Reg_Tmp,x_ax
 mov reg_di, OFFSET Reg_Tmp
-inc reg_pc
+INC_REG_PC x_cx
 ret
     
 DIR_INMEDIATO ENDP
 
 DIR_INMEDIATO_EXT PROC
 
+; parameters 
+; memPtr -> x_cx
+
 xor x_ax,x_ax
 mov ax, WORD PTR [reg_pc]
 mov Reg_Tmp, x_ax
 mov reg_di, OFFSET Reg_Tmp
-add reg_pc, 2
+ADD_REG_PC x_cx, 2
 ret
 
 DIR_INMEDIATO_EXT ENDP
 
 DIR_RELATIVO PROC 
 
+; parameters 
+; memPtr -> x_cx
+
 xor x_bx,x_bx
 movsx x_bx, BYTE PTR [reg_pc] ;e
-inc reg_pc ; PC+1 
-add reg_pc, x_bx ;PC + e
+INC_REG_PC x_cx ; PC+1 
+ADD_REG_PC x_cx, bx ;PC + e
 ret
 
 DIR_RELATIVO ENDP
 
 DIR_EXT PROC 
 
+; parameters 
+; memPtr -> x_cx
+
 xor x_ax,x_ax
 mov ax, WORD PTR [reg_pc]
-add reg_pc, 2
+ADD_REG_PC x_cx, 2
 mov reg_di, x_ax
 ret
 
@@ -54,7 +66,7 @@ movsx x_ax,BYTE PTR [reg_pc]
 add reg_si,x_ax
 mov reg_di,x_cx
 add reg_di,reg_si
-inc reg_pc
+INC_REG_PC x_cx
 ret
 
 DIR_INDEXADO ENDP
