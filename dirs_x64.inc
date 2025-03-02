@@ -63,7 +63,7 @@ DIR_INDEXADO PROC
 xor reg_si,reg_si
 mov si,dx
 movsx x_ax,BYTE PTR [reg_pc]
-add reg_si,x_ax
+add si,ax
 mov reg_di,x_cx
 add reg_di,reg_si
 INC_REG_PC x_cx
@@ -138,8 +138,6 @@ mask_RegA:
 mov x_ax, OFFSET RegA
 
 mask_exit:
-
-mov reg_di, x_ax
 ret
 
 DCB_REGISTER_FROM_MASK ENDP

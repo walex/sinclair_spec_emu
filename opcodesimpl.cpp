@@ -1,12 +1,21 @@
 #include "ULA.h"
+#include "io.h"
 
 extern "C" void __stdcall Inst_IN_Impl(unsigned short int addr, unsigned char* value) {
 	
+    // must be in io.cpp
+#ifndef TEST_CPU
 	ula_read(addr, value);
+#else
+    *value = get_io_next_test_data(addr);
+#endif
+
 }
 
 extern "C" void __stdcall Inst_OUT_Impl(unsigned short int addr, unsigned char value) {
 
+    // must be in io.cpp
+#ifndef TEST_CPU
 	addr = addr & 0x00FF;
 	switch (addr) {
 	case 0xFE:
@@ -15,6 +24,10 @@ extern "C" void __stdcall Inst_OUT_Impl(unsigned short int addr, unsigned char v
 	default:
 		break;
 	}
+#else
+
+#endif
+
 }
 
 extern "C" unsigned char __stdcall parity(unsigned char c) {

@@ -10,11 +10,12 @@
 #include <chrono>
 #include <time.h>
 #include "ULA.h"
+#include "io.h"
 #include <fstream>
 #include "kaitai/kaitaistream.h"
 #include "zx_spectrum_tap.h"
 
-extern "C" void __stdcall Z80CPU(unsigned char*);
+extern "C" int __stdcall Z80CPU(unsigned char*);
 extern "C" void __stdcall InitRegisters(unsigned short*);
 extern "C" void __stdcall GetRegisters(unsigned short*);
 
@@ -148,12 +149,12 @@ void loadTap(unsigned char* mem) {
 	zx_spectrum_tap_t::program_params_t* p_params = (zx_spectrum_tap_t::program_params_t*)blocks[0]->header()->params();
 	zx_spectrum_tap_t::bytes_params_t* c_params = (zx_spectrum_tap_t::bytes_params_t*)blocks[1]->header()->params();
 	zx_spectrum_tap_t::bytes_params_t* c_params2 = (zx_spectrum_tap_t::bytes_params_t*)blocks[2]->header()->params();
-//	memcpy(mem + 0x5CCB, code_basic.data(), p_params->len_program());
-	//memcpy(mem + c_params->start_address(), code_bin.data(), code_bin.size());
+	memcpy(mem + 0x5CCB, code_basic.data(), p_params->len_program());
+	memcpy(mem + c_params->start_address(), code_bin.data(), code_bin.size());
 	memcpy(mem + c_params2->start_address(), code_bin2.data(), code_bin2.size());
 }
 
-std::thread* _T; // put in ula.cpp
+std::thread _T; // put in ula.cpp
 
 int load_tap() {
 
@@ -164,15 +165,27 @@ int load_tap() {
 	}
 	printf("ROM %p\n", (void*)mem);
 
-	loadTap(mem);
+	//loadTap(mem);
 
 	CreateTimer(SPEC_CPU_FREQ);
 
-	_T = new std::thread([&]() {
+	_T = std::thread([&]() {
 
 		ula_init(mem);
 
 		});
+
+	/*
+	_T = new std::thread([&]() {
+
+		std::this_thread::sleep_for(std::chrono::seconds(5));
+		
+
+		loadTap(mem);
+
+		});
+	*/
+	
 	Z80CPU(mem);
 	free(mem);
 	DestroyTimer();
@@ -257,12 +270,31 @@ void test_opcode(const char* test_name, unsigned char* mem, std::vector<unsigned
 		mem[parameters[i]] = (unsigned char)parameters[i + 1];
 	}
 	
-	// Erase initial ram data so parametes will have only the last REGISTERS_COUNT elements + result ram data
+	// Erase initial ram data so parametes will have only the last REGISTERS_COUNT elements + result ram data + port data
 	parameters.erase(parameters.begin(), parameters.begin() + ram_positions_count);
 
+	// read port data
+	clear_io_test_data();
+	// Copy initial ram data
+	unsigned short int port_positions_count = (parameters[0] * 2);
+	// Erase port_positions_count from parameters
+	parameters.erase(parameters.begin(), parameters.begin() + 1);
+	// init port mem
+	for (unsigned short int i = 0; i < port_positions_count; i += 2) {
+
+		put_io_next_test_data(parameters[i], (unsigned char)parameters[i + 1]);
+	}
+
+	// Erase por data so parametes will have only the last REGISTERS_COUNT elements + result ram data
+	parameters.erase(parameters.begin(), parameters.begin() + port_positions_count);
+
+	int r = Z80CPU(mem);
 	
-	Z80CPU(mem);
-	
+	// evaluate if is a invalid o not emulated opcode
+	if (r == -1 && (test_name[0] != '0' || test_name[1] != '0')) {
+		return;
+	}
+
 	GetRegisters(result_data.data());
 	int errcnt = 0;
 	for (int i = 0; i < init_data.size(); i++) {
@@ -317,17 +349,19 @@ int run_test_cases() {
 	
 	char line[MAX_LINE_LENGTH+1];
 	
-	int cnt = 0;
 	// Read each line from the file
 	while (fgets(line, sizeof(line), file)) {
 
 		static int op_cnt = 0;
 		++op_cnt;
-		if (op_cnt == 468001)
-			op_cnt = op_cnt;
 		
+
+		if (op_cnt == 0x000f55cc) {
+			op_cnt = op_cnt;
+		}
+
 		std::vector<unsigned short int> parameters;
-		parameters.reserve((REGISTERS_COUNT * 2) + 10);
+		parameters.reserve((REGISTERS_COUNT * 2) + 100);
 		memset(mem, 0, ROM_128K_SIZE);
 		char* token = strtok(line, ";");  // Split by space, tab, or newline
 		char test_name[64];
@@ -345,7 +379,6 @@ int run_test_cases() {
 		}
 		
 		test_opcode(test_name, mem, parameters);
-		cnt++;
 	}
 	fclose(file);
 	return 0;
@@ -355,5 +388,6 @@ int main(int argc, char* argv[]) {
 	
 	
 	return run_test_cases();
+	//return load_tap();
 }
 #endif

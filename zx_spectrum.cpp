@@ -7,7 +7,7 @@
 #include <time.h>
 #include "ULA.h"
 
-extern "C" void __stdcall Z80CPU(unsigned char*);
+extern "C" int __stdcall Z80CPU(unsigned char*);
 
 static double kZ80CpuCycleUsecs = 0;
 static LARGE_INTEGER kHostCpuFreq;

@@ -1,4 +1,5 @@
 ; https://ps4star.github.io/z80studio/
+;https://clrhome.org/table/
 IFDEF rax
     reg_pc TEXTEQU <r10>
 	reg_si TEXTEQU <rsi>
@@ -160,7 +161,8 @@ include ..\..\opcodesdef.inc
 			ELSE
 				mov reg_pc, mem
 			ENDIF
-			mov memPtr, reg_pc		
+			mov memPtr, reg_pc
+Z80IsNop:
 Z80Loop:
 			invoke execute_interrupts, memPtr
 			cmp HALT, 1
@@ -180,11 +182,15 @@ Z80Loop:
 			add reg_pc, x_bx
 			IncRegR
 			ProcesarOpcodeFromRom _TOp1B
+Z80IsNop:
+			xor x_ax, x_ax
+			not x_ax
 Z80Loop:
-			xor rax, rax
-			mov rax, reg_pc
-			sub rax, memPtr
-			mov reg_pc_tmp, ax
+			
+			xor rcx, rcx
+			mov rcx, reg_pc
+			sub rcx, memPtr
+			mov reg_pc_tmp, cx
 			ret
 		ENDIF
 		            
@@ -192,7 +198,7 @@ Z80Loop:
 			;00		NOP			4	1	1
             nop  		
 			EmulateOpcodeTime 4,1
-            jmp Z80Loop
+            jmp Z80IsNop
        Op01:
 			;01 n n		LD BC,nn		10	2	
 			invoke DIR_INMEDIATO_EXT, memPtr			
@@ -3784,12 +3790,13 @@ Z80Loop:
 			  jmp Z80Loop
         OpDD7C:
 			;DD7C		LD A,IXH			8	2
-			invoke Inst_LD8,OFFSET RegH,OFFSET RegIXH
+			invoke Inst_LD8, OFFSET RegIXH,OFFSET RegA
+			invoke Inst_LD8, OFFSET RegIXH,OFFSET RegA
 			EmulateOpcodeTime 8,2
             jmp Z80Loop
        OpDD7D:
 			;DD7D		LD A,IXL			8	2
-			invoke Inst_LD8,OFFSET RegL,OFFSET RegIXL
+			invoke Inst_LD8,OFFSET RegIXL,OFFSET RegA
 			EmulateOpcodeTime 8,2
             jmp Z80Loop	
        OpDD7E:
@@ -3934,67 +3941,65 @@ Z80Loop:
 	   OpDDCB00:      
 				;DDCB d 06	RLC (IX+d)  23 6
 				invoke Inst_RLC, reg_di
-				CopyToMaskedRegOrNextOpcode 00h, reg_di
+				CopyToMaskedRegOrNextOpcode 00h, [reg_di]
 				EmulateOpcodeTime 23, 6
 			    jmp Z80Loop
 	   OpDDCB01:      
 				;DDCB d 06	RLC (IX+d)  23 6
 				invoke Inst_RLC, reg_di	
-				CopyToMaskedRegOrNextOpcode 01h, reg_di
+				CopyToMaskedRegOrNextOpcode 01h, [reg_di]
 				EmulateOpcodeTime 23,6
 			    jmp Z80Loop
 		OpDDCB02:      
 				;DDCB d 06	RLC (IX+d)  23 6
 				invoke Inst_RLC, reg_di		
-				CopyToMaskedRegOrNextOpcode 02h, reg_di
+				CopyToMaskedRegOrNextOpcode 02h, [reg_di]
 				EmulateOpcodeTime 23,6
 			    jmp Z80Loop
 	   OpDDCB03:      
 				;DDCB d 06	RLC (IX+d)  23 6
 				invoke Inst_RLC, reg_di	
-				CopyToMaskedRegOrNextOpcode 03h, reg_di
+				CopyToMaskedRegOrNextOpcode 03h, [reg_di]
 				EmulateOpcodeTime 23,6
 			    jmp Z80Loop
 	   OpDDCB04:      
 				;DDCB d 06	RLC (IX+d)  23 6
 				invoke Inst_RLC, reg_di
-				CopyToMaskedRegOrNextOpcode 04h, reg_di
+				CopyToMaskedRegOrNextOpcode 04h, [reg_di]
 				EmulateOpcodeTime 23,6
 			    jmp Z80Loop
 	   OpDDCB05:      
 				;DDCB d 06	RLC (IX+d)  23 6
 				invoke Inst_RLC, reg_di		
-				CopyToMaskedRegOrNextOpcode 05h, reg_di
+				CopyToMaskedRegOrNextOpcode 05h, [reg_di]
 				EmulateOpcodeTime 23,6
 			    jmp Z80Loop
 		OpDDCB06:      
 				;DDCB d 06	RLC (IX+d)  23 6
 				invoke Inst_RLC, reg_di	
-				CopyToMaskedRegOrNextOpcode 06h, reg_di
 				EmulateOpcodeTime 23,6
 			    jmp Z80Loop
 	   OpDDCB07:      
 				;DDCB d 06	RLC (IX+d)  23 6
 				invoke Inst_RLC, reg_di		
-				CopyToMaskedRegOrNextOpcode 07h, reg_di
+				CopyToMaskedRegOrNextOpcode 07h, [reg_di]
 				EmulateOpcodeTime 23,6
 			    jmp Z80Loop
 	   OpDDCB08:   
 				;RRC  (IX+nn)   &  LD   B,(IX+nn)	
 				invoke Inst_RRC, reg_di	
-				CopyToMaskedRegOrNextOpcode 08h, reg_di
+				CopyToMaskedRegOrNextOpcode 08h, [reg_di]
 				EmulateOpcodeTime 23,6
 			    jmp Z80Loop	   
 	   OpDDCB0E:
 				;DDCB d 0E	RRC (IX+d)	15 4			
 			    invoke Inst_RRC, reg_di
-				CopyToMaskedRegOrNextOpcode 0Eh, reg_di
 				EmulateOpcodeTime 15,4
 			    jmp Z80Loop
 	   OpDDCB10:   
 				;RL   (IX+nn)   &  LD   B,(IX+nn)
 				invoke Inst_RL, reg_di		
-				CopyToMaskedRegOrNextOpcode 10h, reg_di
+				CopyToMaskedRegOrNextOpcode 10h, [reg_di]
 				EmulateOpcodeTime 23,6
 			    jmp Z80Loop
 	   OpDDCB16:
@@ -4005,7 +4010,7 @@ Z80Loop:
 	   OpDDCB18:   
 				;RR   (IX+nn)   &  LD   B,(IX+nn)
 				invoke Inst_RR, reg_di	
-				CopyToMaskedRegOrNextOpcode 18h, reg_di
+				CopyToMaskedRegOrNextOpcode 18h, [reg_di]
 				EmulateOpcodeTime 23,6
 			    jmp Z80Loop
        OpDDCB1E:
@@ -4016,7 +4021,7 @@ Z80Loop:
 	   OpDDCB20:   
 				;SLA  (IX+nn)   &  LD   B,(IX+nn)
 				invoke Inst_SLA, reg_di	
-				CopyToMaskedRegOrNextOpcode 20h, reg_di
+				CopyToMaskedRegOrNextOpcode 20h, [reg_di]
 				EmulateOpcodeTime 23,6
 			    jmp Z80Loop
        OpDDCB26:
@@ -4027,7 +4032,7 @@ Z80Loop:
 	   OpDDCB28:   
 				;SRA  (IX+nn)   &  LD   B,(IX+nn)
 				invoke Inst_SRA, reg_di
-				CopyToMaskedRegOrNextOpcode 28h, reg_di
+				CopyToMaskedRegOrNextOpcode 28h, [reg_di]
 				EmulateOpcodeTime 23,6
 			    jmp Z80Loop
        OpDDCB2E:
@@ -4038,13 +4043,13 @@ Z80Loop:
 	   OpDDCB30:
 				;SLL  (IX+nn)   &  LD   B,(IX+nn)
 				invoke Inst_SLL, reg_di
-				CopyToMaskedRegOrNextOpcode 30h, reg_di
+				CopyToMaskedRegOrNextOpcode 30h, [reg_di]
 				EmulateOpcodeTime 23,6
 			    jmp Z80Loop
 	   OpDDCB38:   
 				;SRL  (IX+nn)   &  LD   B,(IX+nn)
 				invoke Inst_SRL, reg_di
-				CopyToMaskedRegOrNextOpcode 38h, reg_di
+				CopyToMaskedRegOrNextOpcode 38h, [reg_di]
 				EmulateOpcodeTime 23,6
 			    jmp Z80Loop
 	   OpDDCB3E:
@@ -4097,7 +4102,7 @@ Z80Loop:
 	   OpDDCB80:   
 				;RES  0,(IX+nn) &  LD   B,(IX+nn)
 				invoke Inst_RES,reg_di,0
-				CopyToMaskedRegOrNextOpcode 80h, reg_di
+				CopyToMaskedRegOrNextOpcode 80h, [reg_di]
 				EmulateOpcodeTime 20,5
 				jmp Z80Loop
        OpDDCB86:
@@ -4108,7 +4113,7 @@ Z80Loop:
 	   OpDDCB88:   
 				;RES  1,(IX+nn) &  LD   B,(IX+nn)
 				invoke Inst_RES,reg_di,1
-				CopyToMaskedRegOrNextOpcode 88h, reg_di
+				CopyToMaskedRegOrNextOpcode 88h, [reg_di]
 				EmulateOpcodeTime 20,5
 				jmp Z80Loop
        OpDDCB8E:
@@ -4119,7 +4124,7 @@ Z80Loop:
 	   OpDDCB90:   
 				;RES  2,(IX+nn) &  LD   B,(IX+nn)
 				invoke Inst_RES,reg_di,2
-				CopyToMaskedRegOrNextOpcode 90h, reg_di
+				CopyToMaskedRegOrNextOpcode 90h, [reg_di]
 				EmulateOpcodeTime 20,5
 				jmp Z80Loop
        OpDDCB96:
@@ -4130,7 +4135,7 @@ Z80Loop:
 	   OpDDCB98:   
 				;RES  3,(IX+nn) &  LD   B,(IX+nn)
 				invoke Inst_RES,reg_di,3
-				CopyToMaskedRegOrNextOpcode 98h, reg_di
+				CopyToMaskedRegOrNextOpcode 98h, [reg_di]
 				EmulateOpcodeTime 20,5
 				jmp Z80Loop
        OpDDCB9E:
@@ -4141,7 +4146,7 @@ Z80Loop:
 	   OpDDCBA0:   
 				;RES  4,(IX+nn) &  LD   B,(IX+nn)
 				invoke Inst_RES,reg_di,4
-				CopyToMaskedRegOrNextOpcode 0A0h, reg_di
+				CopyToMaskedRegOrNextOpcode 0A0h, [reg_di]
 				EmulateOpcodeTime 20,5
 				jmp Z80Loop
        OpDDCBA6:
@@ -4152,7 +4157,7 @@ Z80Loop:
 	   OpDDCBA8:   
 				;RES  5,(IX+nn) &  LD   B,(IX+nn)
 				invoke Inst_RES,reg_di,5
-				CopyToMaskedRegOrNextOpcode 0A8h, reg_di
+				CopyToMaskedRegOrNextOpcode 0A8h, [reg_di]
 				EmulateOpcodeTime 20,5
 				jmp Z80Loop
        OpDDCBAE:
@@ -4163,7 +4168,7 @@ Z80Loop:
 	   OpDDCBB0:   
 				;RES  6,(IX+nn) &  LD   B,(IX+nn)
 				invoke Inst_RES,reg_di,6
-				CopyToMaskedRegOrNextOpcode 0B0h, reg_di
+				CopyToMaskedRegOrNextOpcode 0B0h, [reg_di]
 				EmulateOpcodeTime 20,5
 				jmp Z80Loop
        OpDDCBB6:
@@ -4174,7 +4179,7 @@ Z80Loop:
 	   OpDDCBB8:   
 				;RES  7,(IX+nn) &  LD   B,(IX+nn)
 				invoke Inst_RES,reg_di,7
-				CopyToMaskedRegOrNextOpcode 0B8h, reg_di
+				CopyToMaskedRegOrNextOpcode 0B8h, [reg_di]
 				EmulateOpcodeTime 20,5
 				jmp Z80Loop
        OpDDCBBE:
@@ -4185,7 +4190,7 @@ Z80Loop:
 	   OpDDCBC0:   
 				;SET  0,(IX+nn) &  LD   B,(IX+nn)
 				invoke Inst_Set,reg_di,0
-				CopyToMaskedRegOrNextOpcode 0C0h, reg_di
+				CopyToMaskedRegOrNextOpcode 0C0h, [reg_di]
 				EmulateOpcodeTime 20,5
 				jmp Z80Loop
        OpDDCBC6:
@@ -4196,7 +4201,7 @@ Z80Loop:
 	   OpDDCBC8:   
 				;SET  1,(IX+nn) &  LD   B,(IX+nn)
 				invoke Inst_Set,reg_di,1
-				CopyToMaskedRegOrNextOpcode 0C8h, reg_di
+				CopyToMaskedRegOrNextOpcode 0C8h, [reg_di]
 				EmulateOpcodeTime 20,5
 				jmp Z80Loop
        OpDDCBCE:
@@ -4207,7 +4212,7 @@ Z80Loop:
 	   OpDDCBD0:   
 				;SET  2,(IX+nn) &  LD   B,(IX+nn)
 				invoke Inst_Set,reg_di,2
-				CopyToMaskedRegOrNextOpcode 0D0h, reg_di
+				CopyToMaskedRegOrNextOpcode 0D0h, [reg_di]
 				EmulateOpcodeTime 20,5
 				jmp Z80Loop
        OpDDCBD6:
@@ -4218,7 +4223,7 @@ Z80Loop:
 	   OpDDCBD8:   
 				;SET  3,(IX+nn) &  LD   B,(IX+nn)
 				invoke Inst_Set,reg_di,3
-				CopyToMaskedRegOrNextOpcode 0D8h, reg_di
+				CopyToMaskedRegOrNextOpcode 0D8h, [reg_di]
 				EmulateOpcodeTime 20,5
 				jmp Z80Loop	
        OpDDCBDE:
@@ -4229,7 +4234,7 @@ Z80Loop:
 	    OpDDCBE0:   
 				;SET  4,(IX+nn) &  LD   B,(IX+nn)
 				invoke Inst_Set,reg_di,4
-				CopyToMaskedRegOrNextOpcode 0E0h, reg_di
+				CopyToMaskedRegOrNextOpcode 0E0h, [reg_di]
 				EmulateOpcodeTime 20,5
 				jmp Z80Loop	
        OpDDCBE6:
@@ -4240,7 +4245,7 @@ Z80Loop:
 	   OpDDCBE8:   
 				;SET  5,(IX+nn) &  LD   B,(IX+nn)
 				invoke Inst_Set,reg_di,5
-				CopyToMaskedRegOrNextOpcode 0E8h, reg_di
+				CopyToMaskedRegOrNextOpcode 0E8h, [reg_di]
 				EmulateOpcodeTime 20,5
 				jmp Z80Loop	
        OpDDCBEE:
@@ -4251,7 +4256,7 @@ Z80Loop:
 	   OpDDCBF0:   
 				;SET  6,(IX+nn) &  LD   B,(IX+nn)
 				invoke Inst_Set,reg_di,6
-				CopyToMaskedRegOrNextOpcode 0F0h, reg_di
+				CopyToMaskedRegOrNextOpcode 0F0h, [reg_di]
 				EmulateOpcodeTime 20,5
 				jmp Z80Loop	
        OpDDCBF6:
@@ -4262,7 +4267,7 @@ Z80Loop:
 	   OpDDCBF8:   
 				;SET  6,(IX+nn) &  LD   B,(IX+nn)
 				invoke Inst_Set,reg_di,7
-				CopyToMaskedRegOrNextOpcode 0F8h, reg_di
+				CopyToMaskedRegOrNextOpcode 0F8h, [reg_di]
 				EmulateOpcodeTime 20,5
 				jmp Z80Loop	
        OpDDCBFE:      
@@ -4925,6 +4930,7 @@ Z80Loop:
 			  EmulateOpcodeTime 10,2
 			  jmp Z80Loop
 FinZ80Emu:
+		  xor rax, rax
 		  ret
 
 Z80CPU ENDP

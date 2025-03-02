@@ -1026,13 +1026,11 @@ Inst_IN PROC
 push reg_pc
 push reg_si
 push x_bp
+push x_cx
 push x_dx
 invoke Inst_IN_Impl, cx, x_dx
-mov al, [x_dx]
-test al, al
-X86FlagsToZ80Flags SF, ZF, PVF
-ResetFlagBits HF, NF
 pop x_dx
+pop x_cx
 pop x_bp
 pop reg_si
 pop reg_pc
@@ -1115,7 +1113,11 @@ Inst_OUT PROC
 push reg_pc
 push reg_si
 push x_bp
+push x_cx
+push x_dx
 invoke Inst_OUT_Impl, cx, dl
+pop x_dx
+pop x_cx
 pop x_bp
 pop reg_si
 pop reg_pc

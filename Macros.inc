@@ -26,18 +26,13 @@ ResetCPUCicles MACRO
 
 ENDM
 
-CopyToMaskedRegOrNextOpcode MACRO msk, Reg
+CopyToMaskedRegOrNextOpcode MACRO msk, value8
 
-	push x_cx
 	invoke DCB_REGISTER_FROM_MASK, msk	
-	pop x_cx
-	cmp reg_di, 0	
+	test x_ax, x_ax	
 	jz Z80Loop
-	push x_cx
-	push x_dx
-	invoke Inst_LD8, Reg, reg_di
-	pop x_dx
-	pop x_cx
+	mov cl, value8
+	mov [x_ax], cl
 ENDM
 
 ProcesarOpcodeFromRom MACRO JumpTable	
@@ -84,6 +79,7 @@ ENDM
 GetBitMask MACRO dest, args:VARARG
 
 	LOCAL a
+	push Reg_Tmp
 	push x_ax
 	mov Reg_Tmp, 0
     FOR a, <args>
@@ -99,6 +95,7 @@ GetBitMask MACRO dest, args:VARARG
 	ENDM
 	pop x_ax
 	mov dest, Reg_Tmp
+	pop Reg_Tmp
 ENDM
 
 GetBitMaskNeg MACRO dest, args:VARARG
