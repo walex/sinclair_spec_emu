@@ -158,19 +158,28 @@ ENDM
 
 SetPVFromBC MACRO
 
-push x_ax
+;push x_ax
+;ResetFlagBits PVF
+;mov ax, RegBC
+;test ax, ax
+;pushf
+;GetBitMask x_ax, ZF
+;popf
+;lahf
+;and ah, al
+;xor ah, al
+;shl ah, PVF
+;or RegF, ah
+;pop x_ax
+
 ResetFlagBits PVF
 mov ax, RegBC
 test ax, ax
-pushf
-GetBitMask x_ax, ZF
-popf
 lahf
-and ah, al
-xor ah, al
-shl ah, PVF
+and ah, 040h
+xor ah, 040h
+shr ah, ZF-PVF
 or RegF, ah
-pop x_ax
 
 ENDM
 
@@ -263,7 +272,7 @@ add rcx, 2
 
 ENDM
 
-Z80HFCarryFromBit11 MACRO memptr16_a, memptr16_b
+Z80HFCarryFromBit11 MACRO memptr16_a, memptr16_b, usecf
 
 ; (((a & 0xFFF) + (b & 0xFFF)) & 0x1000) == 0x1000
 
@@ -272,6 +281,14 @@ mov ax, WORD PTR [memptr16_a]
 mov bx, WORD PTR [memptr16_b]
 and ax, 0FFFh
 and bx, 0FFFh
+IF usecf EQ 1
+push dx
+xor dx, dx
+mov dl, RegF
+and dl, 1
+add ax, dx
+pop dx
+ENDIF
 add bx, ax
 and bx, 01000h
 shr bx, 8
@@ -281,22 +298,23 @@ ENDM
 
 Z80HFBorrowFromBit12 MACRO memptr16_a, memptr16_b, usecf
 
+; ((a & 0xFFF) - (b & 0xFFF)) & 0x1000) == 0x1000
 ResetFlagBits HF
 mov ax, WORD PTR [memptr16_a]
 mov bx, WORD PTR [memptr16_b]
-and ax, 01FFFh
-and bx, 01FFFh
+and ax, 0FFFh
+and bx, 0FFFh
 IF usecf EQ 1
-push bx
-xor bx, bx
-mov bl, RegF
-and bl, 1
-add ax, bx
-pop bx
+push dx
+xor dx, dx
+mov dl, RegF
+and dl, 1
+add ax, dx
+pop dx
 ENDIF
 sub bx, ax
-and bx, 08000h
-shr bx, 11
+and bx, 01000h
+shr bx, 8
 or RegF, bl
 
 ENDM

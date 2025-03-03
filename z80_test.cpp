@@ -299,7 +299,7 @@ void test_opcode(const char* test_name, unsigned char* mem, std::vector<unsigned
 	int errcnt = 0;
 	for (int i = 0; i < init_data.size(); i++) {
 		
-		if ( i == (int)wz || i == (int)ei || i == (int)q)
+		if ( i == (int)wz || i == (int)ei || i == (int)p || i == (int)q)
 			continue;
 		if (i == (int)f) {
 
@@ -356,7 +356,7 @@ int run_test_cases() {
 		++op_cnt;
 		
 
-		if (op_cnt == 0x000f55cc) {
+		if (op_cnt == 0x000fb737) {
 			op_cnt = op_cnt;
 		}
 

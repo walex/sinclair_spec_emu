@@ -9,19 +9,19 @@
       "AbsoluteMoniker": "D:0:0:{B049BA6D-0EBE-4DA9-B0D0-4F738682688C}|Specy.vcxproj|C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\sinclair_spec_emu\\z80_test.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{B049BA6D-0EBE-4DA9-B0D0-4F738682688C}|Specy.vcxproj|C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\sinclair_spec_emu\\opcodesimpl_x64.inc||{3B902123-F8A7-4915-9F01-361F908088D0}"
+      "AbsoluteMoniker": "D:0:0:{B049BA6D-0EBE-4DA9-B0D0-4F738682688C}|Specy.vcxproj|C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\sinclair_spec_emu\\Macros.inc||{3B902123-F8A7-4915-9F01-361F908088D0}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{B049BA6D-0EBE-4DA9-B0D0-4F738682688C}|Specy.vcxproj|C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\sinclair_spec_emu\\dirs_x64.inc||{3B902123-F8A7-4915-9F01-361F908088D0}|"
+      "AbsoluteMoniker": "D:0:0:{B049BA6D-0EBE-4DA9-B0D0-4F738682688C}|Specy.vcxproj|C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\sinclair_spec_emu\\opcodesimpl_x64.inc||{3B902123-F8A7-4915-9F01-361F908088D0}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{B049BA6D-0EBE-4DA9-B0D0-4F738682688C}|Specy.vcxproj|C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\sinclair_spec_emu\\cpuregs.inc||{3B902123-F8A7-4915-9F01-361F908088D0}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{B049BA6D-0EBE-4DA9-B0D0-4F738682688C}|Specy.vcxproj|C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\sinclair_spec_emu\\Macros.inc||{3B902123-F8A7-4915-9F01-361F908088D0}"
+      "AbsoluteMoniker": "D:0:0:{B049BA6D-0EBE-4DA9-B0D0-4F738682688C}|Specy.vcxproj|C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\sinclair_spec_emu\\dirs_x86.inc||{3B902123-F8A7-4915-9F01-361F908088D0}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{B049BA6D-0EBE-4DA9-B0D0-4F738682688C}|Specy.vcxproj|C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\sinclair_spec_emu\\dirs_x86.inc||{3B902123-F8A7-4915-9F01-361F908088D0}"
+      "AbsoluteMoniker": "D:0:0:{B049BA6D-0EBE-4DA9-B0D0-4F738682688C}|Specy.vcxproj|C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\sinclair_spec_emu\\dirs_x64.inc||{3B902123-F8A7-4915-9F01-361F908088D0}|"
     }
   ],
   "DocumentGroupContainers": [
@@ -35,7 +35,7 @@
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 5,
               "Title": "dirs_x86.inc",
               "DocumentMoniker": "C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\sinclair_spec_emu\\dirs_x86.inc",
               "RelativeDocumentMoniker": "..\\..\\dirs_x86.inc",
@@ -53,22 +53,23 @@
               "RelativeDocumentMoniker": "..\\..\\cpu.asm",
               "ToolTip": "C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\sinclair_spec_emu\\cpu.asm",
               "RelativeToolTip": "..\\..\\cpu.asm",
-              "ViewState": "AgIAAJ8AAAAAAAAAAAAlwKQAAAAJAAAAAAAAAA==",
+              "ViewState": "AgIAAEwHAAAAAAAAAAAAwFsHAAAUAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
               "WhenOpened": "2025-02-25T18:18:10.963Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "opcodesimpl_x64.inc",
               "DocumentMoniker": "C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\sinclair_spec_emu\\opcodesimpl_x64.inc",
               "RelativeDocumentMoniker": "..\\..\\opcodesimpl_x64.inc",
               "ToolTip": "C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\sinclair_spec_emu\\opcodesimpl_x64.inc",
               "RelativeToolTip": "..\\..\\opcodesimpl_x64.inc",
-              "ViewState": "AgIAACwCAAAAAAAAAAAQwDYCAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAGcAAAAAAAAAAAAlwGsAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2025-03-02T15:58:33.791Z"
+              "WhenOpened": "2025-03-02T15:58:33.791Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -78,25 +79,27 @@
               "RelativeDocumentMoniker": "..\\..\\cpuregs.inc",
               "ToolTip": "C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\sinclair_spec_emu\\cpuregs.inc",
               "RelativeToolTip": "..\\..\\cpuregs.inc",
-              "ViewState": "AgIAAGwAAAAAAAAAAAAkwHUAAAAKAAAAAAAAAA==",
+              "ViewState": "AgIAAG4AAAAAAAAAAAAAwHYAAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2025-03-02T15:57:29.675Z"
+              "WhenOpened": "2025-03-02T15:57:29.675Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 2,
               "Title": "Macros.inc",
               "DocumentMoniker": "C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\sinclair_spec_emu\\Macros.inc",
               "RelativeDocumentMoniker": "..\\..\\Macros.inc",
               "ToolTip": "C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\sinclair_spec_emu\\Macros.inc",
               "RelativeToolTip": "..\\..\\Macros.inc",
-              "ViewState": "AgIAAFgAAAAAAAAAAAAAAGEAAAAMAAAAAAAAAA==",
+              "ViewState": "AgIAAKQAAAAAAAAAAAAiwLMAAAAMAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2025-03-02T15:20:53.825Z"
+              "WhenOpened": "2025-03-02T15:20:53.825Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 6,
               "Title": "dirs_x64.inc",
               "DocumentMoniker": "C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\sinclair_spec_emu\\dirs_x64.inc",
               "RelativeDocumentMoniker": "..\\..\\dirs_x64.inc",
@@ -114,7 +117,7 @@
               "RelativeDocumentMoniker": "..\\..\\z80_test.cpp",
               "ToolTip": "C:\\Users\\wadrw\\OneDrive\\Documents\\develop\\projects\\specy\\sinclair_spec_emu\\z80_test.cpp",
               "RelativeToolTip": "..\\..\\z80_test.cpp",
-              "ViewState": "AgIAAC8BAAAAAAAAAAAEwDcBAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAC4BAAAAAAAAAADgvzcBAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2025-03-02T14:26:24.225Z",
               "EditorCaption": ""

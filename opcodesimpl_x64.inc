@@ -527,7 +527,7 @@ Inst_ADD16 PROC
 ; Reg_Ori:PTR WORD -> x_cx
 ; Reg_Dest:PTR WORD -> x_dx
 
-Z80HFCarryFromBit11 x_cx, x_dx
+Z80HFCarryFromBit11 x_cx, x_dx, 0
 mov bx, WORD PTR [x_cx]
 add WORD PTR [x_dx],bx
 X86FlagsToZ80Flags CF
@@ -542,11 +542,11 @@ Inst_ADC16 PROC
 ; Reg_Ori:PTR WORD -> x_cx
 
 mov x_dx, OFFSET RegHL
-Z80HFCarryFromBit11 x_cx, x_dx
+Z80HFCarryFromBit11 x_cx, x_dx, 1
 LoadZ80CarryFlag
 mov ax, WORD PTR [x_cx]	
 adc RegHL,ax
-X86FlagsToZ80Flags SF, HF, ZF, OF, CF
+X86FlagsToZ80Flags SF, ZF, OF, CF
 ResetFlagBits NF
 ret
 
@@ -562,7 +562,7 @@ Z80HFBorrowFromBit12 x_cx, x_dx, 1
 LoadZ80CarryFlag
 mov ax,WORD PTR [x_cx]	
 sbb RegHL,ax
-X86FlagsToZ80Flags SF, HF, ZF, OF, CF
+X86FlagsToZ80Flags SF, ZF, OF, CF
 SetFlagBits NF
 ret
 
@@ -771,33 +771,31 @@ Inst_RLD PROC
 ; parameters
 ; memPtr:PTR BYTE -> x_cx
 
-invoke DIR_REGISTRO_INDIRECTO,x_cx,RegHL		
+;ld A,$WX
+;ld (HL),$YZ
+;RLD
+; A = $WY -> 0908
+; (HL) = $ZX -> 030f
+
+invoke DIR_REGISTRO_INDIRECTO,x_cx,RegHL
 
 xor cx, cx
-mov cl, [reg_di]
-mov ch, cl
-and cl, 0fh	 ; low (HL)
-and ch, 0f0h  ; high (HL)		 
-
-xor ax, ax
-mov al, RegA
-mov ah, al
-and al, 0fh ; low A
-and ah, 0f0h ; high A
-
-; new (HL)
-shl cl, 4
-or cl, al
+mov ch, RegA ;WX
+mov cl, [reg_di] ;YZ 
+push cx
+and ch, 0fh  ;0X
+shl cl, 4	 ;Z0
+or cl, ch	 ;ZX
 mov [reg_di], cl
-
-; NEW A
-shr ch, 4
-or ah, ch
-mov RegA, ah
-
-test ah, ah
+pop cx ;WX ;YZ
+and ch, 0F0h ;W0
+shr cl, 4 ;Y
+or ch, cl ; WY
+mov RegA, ch
+test ch, ch
 X86FlagsToZ80Flags SF, ZF, PVF
 ResetFlagBits HF, NF
+ret
 
 Inst_RLD ENDP
 

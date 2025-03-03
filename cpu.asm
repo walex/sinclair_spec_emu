@@ -47,7 +47,7 @@ ENDIF
 InitRegisters PROC
 
 .data
-;TEST_OPCODES EQU 1
+TEST_OPCODES EQU 1
 
 .code
 ; params
@@ -1591,6 +1591,8 @@ Z80Loop:
        OpED4D:
 			  ;ED4D		RETI 14 4
 			  invoke Inst_RET,memPtr
+			  mov al,IFF2
+			  mov IFF1,al
 			  invoke onDeviceIOEnd
 			  EmulateOpcodeTime 14,4
 			  jmp Z80Loop
@@ -1666,7 +1668,6 @@ Z80Loop:
 			  invoke Inst_ADC16,OFFSET RegDE
 			  EmulateOpcodeTime 15,4
 			  jmp Z80Loop
-
        OpED5B:
 		      ;ED5B n n	LD DE,(nn)	20 6 
 			  invoke DIR_EXT, memPtr
@@ -1788,9 +1789,9 @@ Z80Loop:
 				EmulateOpcodeTime 18,5
 				jmp Z80Loop
        OpED70:
-			  ;ED70  IN  F,(C)	12	3
-			  invoke INST_IN, RegBC, OFFSET RegF
-			  SetIOFlags RegF
+			  ;ED70  IN  F,(C)	12	3			  
+			  invoke INST_IN, RegBC, OFFSET Reg_Tmp8
+			  SetIOFlags Reg_Tmp8
 			  EmulateOpcodeTime 12,3
 			  jmp Z80Loop
        OpED71:

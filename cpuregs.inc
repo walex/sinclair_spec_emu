@@ -102,11 +102,10 @@
 	 HALT		db  0
 
 	 Reg_Tmp PTR_DATA_TYPE 0
+	 Reg_Tmp16	dw	0
+	 Reg_Tmp8	db	0
 
    _CPU ENDS		
-
-   ;Reg_Tmp PTR_DATA_TYPE 0	 
-   
 
    reg_pc_tmp dw 0
 
@@ -182,3 +181,5 @@ A_LINE EQU [Z80_CPU.A_LINE]
 HALT EQU [Z80_CPU.HALT]
 
 Reg_Tmp EQU [Z80_CPU.Reg_Tmp]
+Reg_Tmp16 EQU [Z80_CPU.Reg_Tmp16]
+Reg_Tmp8 EQU [Z80_CPU.Reg_Tmp8]
