@@ -77,12 +77,25 @@ Inst_EX PROC
 
 mov bx,WORD PTR [x_cx]
 mov ax, WORD PTR[x_dx]
-xchg ax,bx
-mov WORD PTR [x_cx],bx
-mov WORD PTR [x_dx],ax 
+mov WORD PTR [x_cx],ax
+mov WORD PTR [x_dx],bx 
 ret
 
 Inst_EX ENDP
+
+Inst_EX8 PROC
+
+; parameters
+; Reg_Ori:PTR BYTE -> x_cx
+; Reg_Dest:PTR BYTE -> x_dx
+
+mov ah, [x_cx]
+mov al, [x_dx]
+mov [x_cx], al
+mov [x_dx], ah
+ret
+
+Inst_EX8 ENDP
 
 Inst_EXX PROC
 
@@ -120,13 +133,14 @@ cmp RegBC, 0
 jnz LDIR_start
 mov RegBC, 0FFFFh
 LDIR_start:
-invoke Inst_LDI
+invoke Inst_LDI, x_cx
 cmp RegBC, 0
-jz LDIR_exit
-IncRegRByBC
-EmulateOpcodeTime 21,5
-invoke execute_interrupts, x_cx
-jmp LDIR_start
+jz LDIR_end
+sub reg_pc, 2
+invoke RunOpcodeTimer, 21,5
+jmp LDIR_exit
+LDIR_end:
+invoke RunOpcodeTimer, 16,4
 LDIR_exit:
 ret
 
@@ -159,13 +173,14 @@ cmp RegBC, 0
 jnz LDDR_start
 mov RegBC, 0FFFFh
 LDDR_start:
-invoke Inst_LDD
+invoke Inst_LDD, x_cx
 cmp RegBC, 0
-jz LDDR_exit
-IncRegRByBC
-EmulateOpcodeTime 21,5
-invoke execute_interrupts, x_cx
-jmp LDDR_start
+jz LDDR_end
+sub reg_pc, 2
+invoke RunOpcodeTimer, 21,5
+jmp LDDR_exit
+LDDR_end:
+invoke RunOpcodeTimer, 16,4
 LDDR_exit:
 ret
 
@@ -197,13 +212,16 @@ cmp RegBC, 0
 jnz CPIR_start
 mov RegBC, 0FFFFh
 CPIR_start:
-invoke Inst_CPI
+invoke Inst_CPI, x_cx
 TestZ80Flag ZF
-jz CPIR_exit
-TestZ80Flag PVF
-jz CPIR_exit
-invoke execute_interrupts, x_cx
-jmp CPIR_start
+jnz CPIR_end
+cmp RegBC, 0
+jz CPIR_end
+sub reg_pc, 2
+invoke RunOpcodeTimer, 21,5
+jmp CPIR_exit
+CPIR_end:
+invoke RunOpcodeTimer, 16,4
 CPIR_exit:
 ret
 
@@ -231,17 +249,21 @@ Inst_CPDR PROC
 ; parameters
 ; memPtr:PTR BYTE -> x_cx
 
+
 cmp RegBC, 0
 jnz CPDR_start
 mov RegBC, 0FFFFh
 CPDR_start:
-invoke Inst_CPD
+invoke Inst_CPD, x_cx
 TestZ80Flag ZF
-jz CPDR_exit
-TestZ80Flag PVF
-jz CPDR_exit
-invoke execute_interrupts, x_cx
-jmp CPDR_start
+jnz CPDR_end
+cmp RegBC, 0
+jz CPDR_end
+sub reg_pc, 2
+invoke RunOpcodeTimer, 21,5
+jmp CPDR_exit
+CPDR_end:
+invoke RunOpcodeTimer, 16,4
 CPDR_exit:
 ret
 
@@ -392,96 +414,6 @@ pop reg_pc
 ret
 
 Inst_DAA ENDP
-
-Inst_DAA_OLD PROC
-
-mov ah, 0
-Inst_DAA_step1:
-mov al, RegA
-mov bl, RegF
-GetBitMask x_cx, HF
-and bl, cl
-jnz Inst_DAA_inc_T1
-and al, 0fh
-cmp al, 09h
-jbe Inst_DAA_step2
-Inst_DAA_inc_T1:
-inc ah
-
-Inst_DAA_step2:
-mov al, RegA
-mov bl, RegF
-GetBitMask x_cx, CF
-and bl, cl
-jnz Inst_DAA_inc_T2
-cmp al, 099h
-jbe Inst_DAA_step3
-Inst_DAA_inc_T2:
-add ah, 2
-SetFlagBits CF
-
-mov al, RegA
-mov bh, al
-mov bl, RegF
-
-Inst_DAA_step3:
-GetBitMask x_cx, NF
-and bl, cl
-jnz Inst_DAA_N_is_set
-;flags.H = ((A & 0x0F) >= 0x0A)
-ResetFlagBits HF
-and bh, 0fh
-cmp bh, 0ah
-jb Inst_DAA_step4
-SetFlagBits HF
-jmp Inst_DAA_step4
-Inst_DAA_N_is_set:
-GetBitMask x_cx, HF
-mov bl, RegF
-and bl, cl
-jnz Inst_DAA_H_is_set
-jmp Inst_DAA_step4
-Inst_DAA_H_is_set:
-;flags.H = (((A & 0x0F)) < 6);
-ResetFlagBits HF
-and bh, 0fh
-cmp bh, 06h
-jae Inst_DAA_step4
-SetFlagBits HF
-
-Inst_DAA_step4:
-Inst_DAA_T_case1:
-cmp ah, 1
-jnz Inst_DAA_T_case2
-; A += (flags.N)?0xFA:0x06; // -6:6 --> neg(a): a
-add al, 06h
-jmp Inst_DAA_step5
-Inst_DAA_T_case2:
-cmp ah, 2
-jnz Inst_DAA_T_case3
-; A += (flags.N)?0xA0:0x60; // -0x60:0x60 --> neg(a): a
-add al, 060h
-jmp Inst_DAA_step5
-Inst_DAA_T_case3:
-cmp ah, 3
-jnz Inst_DAA_step5
-;A += (flags.N)?0x9A:0x66; // -0x66:0x66 --> neg(a): a
-add al, 066h
-
-Inst_DAA_step5:
-GetBitMask x_cx, NF
-mov bl, RegF
-and bl, cl
-jz Inst_DAA_step6
-neg al
-
-Inst_DAA_step6:
-test al, al
-X86FlagsToZ80Flags SF, ZF, PVF
-mov RegA, al
-ret
-
-Inst_DAA_OLD ENDP
 
 Inst_CPL PROC
 
@@ -873,21 +805,6 @@ shl ah, SF-ZF
 or RegF, ah
 ret
 
-;xor  ax, ax
-;mov al, [x_cx]
-;ResetFlagBits ZF, NF
-;SetFlagBits HF
-;xor cx, cx
-;mov cl, dl
-;bt ax, cx
-;lahf
-;GetBitMask x_cx, CF
-;and ah, cl
-;xor ah, cl
-;shl ah, ZF-CF
-;or RegF, ah
-;ret
-
 Inst_BIT ENDP
 
 Inst_SET PROC
@@ -1011,6 +928,7 @@ pop x_dx
 mov bl,dl
 add x_ax,x_bx
 mov reg_pc,x_ax
+mov HALT, 0
 ret
 
 Inst_RST ENDP
@@ -1032,6 +950,7 @@ pop x_cx
 pop x_bp
 pop reg_si
 pop reg_pc
+
 ret
 
 Inst_IN ENDP
@@ -1045,8 +964,7 @@ invoke DIR_REGISTRO_INDIRECTO, x_cx, RegHL
 invoke INST_IN, RegBC, reg_di
 inc RegHL
 dec RegB
-X86FlagsToZ80Flags ZF
-SetFlagBits NF
+SetIOBlockFlagsIN reg_di, 1
 ret
 
 INST_INI ENDP
@@ -1056,15 +974,16 @@ INST_INIR PROC
 ; parameters
 ; memPtr:PTR BYTE -> x_cx
 
-INST_INIR_init:
+INIR_start:
 invoke INST_INI, x_cx
 cmp RegB, 0
-jz INST_INIR_end
-EmulateOpcodeTime 21,5
-invoke execute_interrupts, x_cx
-jmp INST_INIR_init
-INST_INIR_end:
-SetFlagBits ZF
+jz INIR_end
+sub reg_pc, 2
+invoke RunOpcodeTimer, 21,5
+jmp INIR_exit
+INIR_end:
+invoke RunOpcodeTimer, 16,4
+INIR_exit:
 ret
 
 INST_INIR ENDP
@@ -1078,8 +997,7 @@ invoke DIR_REGISTRO_INDIRECTO, x_cx, RegHL
 invoke INST_IN, RegBC, reg_di
 dec RegHL
 dec RegB
-X86FlagsToZ80Flags ZF
-SetFlagBits NF
+SetIOBlockFlagsIN reg_di, 0ffh
 ret
 
 INST_IND ENDP
@@ -1089,15 +1007,16 @@ INST_INDR PROC
 ; parameters
 ; memPtr:PTR BYTE -> x_cx
 
-INST_INDR_init:
+INDR_start:
 invoke INST_IND, x_cx
 cmp RegB, 0
-jz INST_INDR_end
-EmulateOpcodeTime 21,5
-invoke execute_interrupts, x_cx
-jmp INST_INDR_init
-INST_INDR_end:
-SetFlagBits ZF
+jz INDR_end
+sub reg_pc, 2
+invoke RunOpcodeTimer, 21,5
+jmp INDR_exit
+INDR_end:
+invoke RunOpcodeTimer, 16,4
+INDR_exit:
 ret
 
 INST_INDR ENDP
@@ -1132,10 +1051,9 @@ invoke DIR_REGISTRO_INDIRECTO, x_cx, RegHL
 dec RegB
 invoke INST_OUT, RegBC, dl	 
 inc RegHL
-mov al, RegB
-test al, al
-X86FlagsToZ80Flags ZF
-SetFlagBits NF
+mov Reg_Tmp8, dl
+mov x_cx, OFFSET Reg_Tmp8
+SetIOBlockFlagsOUT x_cx
 ret
 
 INST_OUTI ENDP
@@ -1145,15 +1063,16 @@ INST_OTIR PROC
 ; parameters
 ; memPtr:PTR BYTE  -> x_cx
 
-INST_OTIR_init:
+OTIR_start:
 invoke INST_OUTI, x_cx
 cmp RegB, 0
-jz INST_OTIR_end
-EmulateOpcodeTime 21,5
-invoke execute_interrupts, x_cx
-jmp INST_OTIR_init
-INST_OTIR_end:
-SetFlagBits ZF
+jz OTIR_end
+sub reg_pc, 2
+invoke RunOpcodeTimer, 21,5
+jmp OTIR_exit
+OTIR_end:
+invoke RunOpcodeTimer, 16,4
+OTIR_exit:
 ret
 
 INST_OTIR ENDP
@@ -1168,10 +1087,9 @@ dec RegB
 mov dl, [reg_di]
 invoke INST_OUT, RegBC, dl
 dec RegHL
-mov al, RegB
-test al, al
-X86FlagsToZ80Flags ZF
-SetFlagBits NF
+mov Reg_Tmp8, dl
+mov x_cx, OFFSET Reg_Tmp8
+SetIOBlockFlagsOUT x_cx
 ret
 
 INST_OUTD ENDP
@@ -1181,37 +1099,21 @@ INST_OTDR PROC
 ; parameters
 ; memPtr:PTR BYTE -> x_cx
 
-INST_OTDR_init:
+OTDR_start:
 invoke INST_OUTD, x_cx
 cmp RegB, 0
-jz INST_OTDR_end
-EmulateOpcodeTime 21,5
-invoke execute_interrupts, x_cx
-jmp INST_OTDR_init
-INST_OTDR_end:
-SetFlagBits ZF
+jz OTDR_end
+sub reg_pc, 2
+invoke RunOpcodeTimer, 21,5
+jmp OTDR_exit
+OTDR_end:
+invoke RunOpcodeTimer, 16,4
+OTDR_exit:
 ret
 
 INST_OTDR ENDP
 
 ;-----------------------------------------
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 Noemu PROC
 

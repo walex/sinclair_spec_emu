@@ -39,7 +39,7 @@ static const int kSpectrumResolutionY = 192;
 
 void display_draw(unsigned char* mem, OnScreenValueCB onScreenValue, DrawScreenBlitCB onScreenBlt)
 {
-	unsigned char* mem_atrib_video = mem + 22528; // 0x5800
+	unsigned char* mem_atrib_video = mem + 0x5800;
 	unsigned char* mem_video = mem + 0x4000;
 	unsigned char mask = 0x80;
 	unsigned char byte;

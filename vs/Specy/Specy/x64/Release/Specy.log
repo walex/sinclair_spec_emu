@@ -1,0 +1,17 @@
+﻿  Assembling ..\..\cpu.asm...
+  display.cpp
+  io.cpp
+  kaitaistream.cpp
+  keyboard.cpp
+  opcodesimpl.cpp
+  ULA.cpp
+  WindowsTools.cpp
+  z80_test.cpp
+  zx_spectrum.cpp
+C:\Users\wadrw\OneDrive\Documents\develop\projects\specy\sinclair_spec_emu\zx_spectrum.cpp(173,25): warning C4244: 'initializing': conversion from 'unsigned __int64' to 'double', possible loss of data
+  zx_spectrum_tap.cpp
+  Generating code
+  Previous IPDB not found, fall back to full compilation.
+  All 714 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Finished generating code
+  Specy.vcxproj -> C:\Users\wadrw\OneDrive\Documents\develop\projects\specy\sinclair_spec_emu\vs\Specy\x64\Release\Specy.exe

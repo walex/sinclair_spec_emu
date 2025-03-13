@@ -19,11 +19,16 @@ DIR_INMEDIATO_EXT PROC
 ; parameters 
 ; memPtr -> x_cx
 
-xor x_ax,x_ax
-mov ax, WORD PTR [reg_pc]
+xor x_ax, x_ax
+xor x_bx, x_bx
+mov al, [reg_pc]
+INC_REG_PC x_cx
+mov bl, [reg_pc]
+INC_REG_PC x_cx
+shl bx, 8
+or ax, bx
 mov Reg_Tmp, x_ax
 mov reg_di, OFFSET Reg_Tmp
-ADD_REG_PC x_cx, 2
 ret
 
 DIR_INMEDIATO_EXT ENDP
@@ -46,10 +51,15 @@ DIR_EXT PROC
 ; parameters 
 ; memPtr -> x_cx
 
-xor x_ax,x_ax
-mov ax, WORD PTR [reg_pc]
-ADD_REG_PC x_cx, 2
+xor x_ax, x_ax
+mov ax, [reg_pc]
+INC_REG_PC x_cx
+mov bx, [reg_pc]
+INC_REG_PC x_cx
+shl bx, 8
+or ax, bx
 mov reg_di, x_ax
+
 ret
 
 DIR_EXT ENDP

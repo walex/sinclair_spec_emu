@@ -6,6 +6,7 @@
 #define NOMINMAX 
 #include <Windows.h>
 #include <stdio.h>
+#include <condition_variable>
 #include <thread>
 #include <chrono>
 #include <time.h>
@@ -15,7 +16,7 @@
 #include "kaitai/kaitaistream.h"
 #include "zx_spectrum_tap.h"
 
-extern "C" int __stdcall Z80CPU(unsigned char*);
+extern "C" int __stdcall Z80CPU(unsigned char*, double z80CycleTimeNano, double hostCPUCycleTimeNano, unsigned char* assemble);
 extern "C" void __stdcall InitRegisters(unsigned short*);
 extern "C" void __stdcall GetRegisters(unsigned short*);
 
@@ -23,17 +24,21 @@ static double kZ80CpuCycleUsecs = 0;
 static LARGE_INTEGER kHostCpuFreq;
 static LARGE_INTEGER kStartTimer;
 static  HANDLE kTimer;
+static double kZ80CpuCycleTimeInNanoseconds;
+static double kHostCpuCycleTimeInNanoseconds;
 
 const char* SPECY_ROM_PATH = "..\\..\\spec_48.rom";
-const char* Z80_TEST_PATH = "..\\..\\zexall.tap";
+const char* Z80_ZEXALL_TAP_PATH = "..\\..\\zexall.tap";
+const char* Z80_ZEXALL_BIN_PATH = "..\\..\\zexall.bin";
+const char* Z80_ZEXDOC_BIN_PATH = "..\\..\\zexdoc.bin";
 const char* MANIC_MINER_PATH = "..\\..\\manic_miner.tap";
-const char* TEST_CASES_PATH = "..\\..\\..\\tests\\test_cases.txt";
+const char* TEST_CASES_PATH = "..\\..\\..\\test2\\test_cases.txt";
 const size_t ROM_128K_SIZE = 128 * 1024;
 const size_t RAM_48K_SIZE = 48 * 1024;
 const size_t ROM_16K_SIZE = 16 * 1024;
 const double SPEC_CPU_FREQ = 3.5;
 
-double calculate_cycle_time_usecs(double clock_frequency_mhz) {
+double calculate_cycle_time_nanosecs(double clock_frequency_mhz) {
 	// Convert clock frequency from MHz to Hz
 	double clock_frequency_hz = clock_frequency_mhz * 1e6;
 
@@ -41,45 +46,28 @@ double calculate_cycle_time_usecs(double clock_frequency_mhz) {
 	double time_per_cycle_seconds = 1.0 / clock_frequency_hz;
 
 	// Convert to microseconds (1 second = 1,000,000 microseconds)
-	double time_per_cycle_microseconds = time_per_cycle_seconds * 1e6;
+	double time_per_cycle_nanoeconds = time_per_cycle_seconds * 1e9;
 
-	return time_per_cycle_microseconds;
-}
-
-extern "C" void __stdcall CreateTimer(double clock_frequency_mhz) {
-
-	kZ80CpuCycleUsecs = calculate_cycle_time_usecs(clock_frequency_mhz);
-	QueryPerformanceFrequency(&kHostCpuFreq); // Get the high-resolution timer frequency	 
-	kTimer = CreateWaitableTimer(NULL, TRUE, NULL);
-	QueryPerformanceCounter(&kStartTimer);      // Get the starting counter value
-}
-
-extern "C" void __stdcall DestroyTimer() {
-
-	CloseHandle(kTimer);
-}
-
-extern "C" void __stdcall EmulateOpcodeTimeCB(unsigned short cycles, unsigned short t_states, unsigned char op) {
-
-	printf("opcode called %d %d %0x\n", t_states, cycles, (int)op);
-
-	double microseconds = ((double)t_states) * ((double)cycles) * kZ80CpuCycleUsecs;
-
-	LARGE_INTEGER end;
-
-	double target_ticks = (microseconds * kHostCpuFreq.QuadPart) / 1e6; // Convert microseconds to ticks
-
-	do {
-		QueryPerformanceCounter(&end);    // Get the current counter value
-	} while ((end.QuadPart - kStartTimer.QuadPart) < target_ticks);
-
-	QueryPerformanceCounter(&kStartTimer);
+	return time_per_cycle_nanoeconds;
 }
 
 extern "C" void __stdcall PrintType(const char* str) {
 
 	printf("%s\n", str);
 
+}
+
+void loadZexallBin(unsigned char* mem) {
+
+   FILE* rom = nullptr;
+   fopen_s(&rom, Z80_ZEXDOC_BIN_PATH, "rb");
+   if (rom){
+	   fseek(rom, 0, SEEK_END); // Move the file pointer to the end
+	   size_t romSize = ftell(rom);
+	   fseek(rom, 0, SEEK_SET);
+	   fread(mem + 0x8000, romSize, 1, rom);
+	   fclose(rom);
+   }
 }
 
 unsigned char* loadRom(const char* path, size_t ramSize) {
@@ -134,63 +122,6 @@ memory between 5CB6h and CHANS. Other hardware like Currah uSpeech
  may allocate memory between RAMTOP and UDG.
 
 */
-
-void loadTap(unsigned char* mem) {
-
-	std::ifstream is(MANIC_MINER_PATH, std::ifstream::binary);
-	kaitai::kstream ks(&is);
-	zx_spectrum_tap_t data(&ks);
-	auto& blocks = *data.blocks();
-	//zx_spectrum_tap_t::header_type_enum_t t = blocks[0]->header()->header_type();
-	//t = blocks[1]->header()->header_type();
-	const std::string& code_basic = blocks[0]->data();
-	const std::string& code_bin = blocks[1]->data();
-	const std::string& code_bin2 = blocks[2]->data();
-	zx_spectrum_tap_t::program_params_t* p_params = (zx_spectrum_tap_t::program_params_t*)blocks[0]->header()->params();
-	zx_spectrum_tap_t::bytes_params_t* c_params = (zx_spectrum_tap_t::bytes_params_t*)blocks[1]->header()->params();
-	zx_spectrum_tap_t::bytes_params_t* c_params2 = (zx_spectrum_tap_t::bytes_params_t*)blocks[2]->header()->params();
-	memcpy(mem + 0x5CCB, code_basic.data(), p_params->len_program());
-	memcpy(mem + c_params->start_address(), code_bin.data(), code_bin.size());
-	memcpy(mem + c_params2->start_address(), code_bin2.data(), code_bin2.size());
-}
-
-std::thread _T; // put in ula.cpp
-
-int load_tap() {
-
-	unsigned char* mem = loadRom(SPECY_ROM_PATH, RAM_48K_SIZE);
-	if (!mem) {
-		perror("cannot load rom file");
-		return -1;
-	}
-	printf("ROM %p\n", (void*)mem);
-
-	//loadTap(mem);
-
-	CreateTimer(SPEC_CPU_FREQ);
-
-	_T = std::thread([&]() {
-
-		ula_init(mem);
-
-		});
-
-	/*
-	_T = new std::thread([&]() {
-
-		std::this_thread::sleep_for(std::chrono::seconds(5));
-		
-
-		loadTap(mem);
-
-		});
-	*/
-	
-	Z80CPU(mem);
-	free(mem);
-	DestroyTimer();
-	return 0;
-}
 
 
 #define MAX_LINE_LENGTH 512
@@ -250,6 +181,25 @@ const char* reg_names[] = { "pc",
 "iff2"
 };
 
+void getZ80AndHostCPUFreq(double& z80CpuCycleTimeInNanoseconds, double& hostCpuCycleTimeInNanoseconds) {
+	// Get the initial time stamp counter value
+	unsigned long long startCycles = __rdtsc();  // rdtsc provides the number of cycles
+
+	// Sleep for a known amount of time (e.g., 1 second)
+	Sleep(1000);  // Sleep for 1 second
+
+	// Get the final time stamp counter value
+	unsigned long long endCycles = __rdtsc();
+
+	// Calculate the difference in cycles
+	unsigned long long cycleDifference = endCycles - startCycles;
+
+	// The number of nanoseconds in one second is 1e9
+	double cyclesPerSecond = (double)cycleDifference;  // This is the total cycles over 1 second
+	hostCpuCycleTimeInNanoseconds = 1.0 / (cyclesPerSecond / 1e9);
+	z80CpuCycleTimeInNanoseconds = calculate_cycle_time_nanosecs(SPEC_CPU_FREQ);
+}
+
 void test_opcode(const char* test_name, unsigned char* mem, std::vector<unsigned short int>& parameters) {
 	
 	// Create a new vector with the first REGISTERS_COUNT elements
@@ -288,7 +238,8 @@ void test_opcode(const char* test_name, unsigned char* mem, std::vector<unsigned
 	// Erase por data so parametes will have only the last REGISTERS_COUNT elements + result ram data
 	parameters.erase(parameters.begin(), parameters.begin() + port_positions_count);
 
-	int r = Z80CPU(mem);
+	// get cpus cycle time
+	int r = Z80CPU(mem, kZ80CpuCycleTimeInNanoseconds, kHostCpuCycleTimeInNanoseconds, (unsigned char *)0x8000);
 	
 	// evaluate if is a invalid o not emulated opcode
 	if (r == -1 && (test_name[0] != '0' || test_name[1] != '0')) {
@@ -303,7 +254,7 @@ void test_opcode(const char* test_name, unsigned char* mem, std::vector<unsigned
 			continue;
 		if (i == (int)f) {
 
-			// ignore undoc flags for the moment...
+			// ignore undoc flags bits for the moment...
 			result_data[i] = result_data[i] & 0xD7;
 			parameters[i] = parameters[i] & 0xD7;
 		}
@@ -339,26 +290,24 @@ int run_test_cases() {
 
 	unsigned char mem[ROM_128K_SIZE];
 	
+	getZ80AndHostCPUFreq(kZ80CpuCycleTimeInNanoseconds, kHostCpuCycleTimeInNanoseconds);
 
 	FILE* file = fopen(TEST_CASES_PATH, "r");
 	if (file == NULL) {
 		printf("Error opening file.\n");
-		return 1;
+		return -1;
 	}
-		
-	
 	char line[MAX_LINE_LENGTH+1];
 	
 	// Read each line from the file
 	while (fgets(line, sizeof(line), file)) {
 
 		static int op_cnt = 0;
-		++op_cnt;
-		
+		++op_cnt;		
 
-		if (op_cnt == 0x000fb737) {
+		/*if (op_cnt == 0x00008e7b) {
 			op_cnt = op_cnt;
-		}
+		}*/
 
 		std::vector<unsigned short int> parameters;
 		parameters.reserve((REGISTERS_COUNT * 2) + 100);
@@ -377,16 +326,26 @@ int run_test_cases() {
 			parameters.push_back((unsigned int)strtoul(token, &endptr, 10));
 			token = strtok(NULL, ";");
 		}
-		
 		test_opcode(test_name, mem, parameters);
 	}
 	fclose(file);
 	return 0;
 }
 
+int run_zexall_test() {
+	
+	getZ80AndHostCPUFreq(kZ80CpuCycleTimeInNanoseconds, kHostCpuCycleTimeInNanoseconds);
+	unsigned char* mem = loadRom(SPECY_ROM_PATH, ROM_128K_SIZE);
+	loadZexallBin(mem);
+	int r = Z80CPU(mem, kZ80CpuCycleTimeInNanoseconds, kHostCpuCycleTimeInNanoseconds, (unsigned char*)0x8000);
+	free(mem);
+	return 0;
+}
+
 int main(int argc, char* argv[]) {
 	
 	
+	//return run_zexall_test();
 	return run_test_cases();
 	//return load_tap();
 }

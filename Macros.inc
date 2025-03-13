@@ -1,3 +1,4 @@
+
 .code
 
 INC_REG_PC MACRO mem
@@ -15,14 +16,6 @@ add ax, value
 mov reg_pc, mem
 add reg_pc, x_ax
 pop x_ax
-
-ENDM
-
-EmulateOpcodeTime MACRO Estados, Ciclos, uSecs
-
-ENDM
-
-ResetCPUCicles MACRO
 
 ENDM
 
@@ -58,18 +51,6 @@ mov al,RegR
 mov ah,al
 and al,80h
 inc ah
-and ah,7fh
-or al,ah
-mov RegR,al
-	
-ENDM
-
-IncRegRByBC MACRO
-
-mov al,RegR
-mov ah,al
-and al,80h
-add ah,2
 and ah,7fh
 or al,ah
 mov RegR,al
@@ -158,20 +139,6 @@ ENDM
 
 SetPVFromBC MACRO
 
-;push x_ax
-;ResetFlagBits PVF
-;mov ax, RegBC
-;test ax, ax
-;pushf
-;GetBitMask x_ax, ZF
-;popf
-;lahf
-;and ah, al
-;xor ah, al
-;shl ah, PVF
-;or RegF, ah
-;pop x_ax
-
 ResetFlagBits PVF
 mov ax, RegBC
 test ax, ax
@@ -218,6 +185,7 @@ GetBitMask x_cx, flag
 mov ch, RegF
 and ch, cl
 test ch, ch
+pop x_cx
 
 ENDM
 
@@ -316,5 +284,111 @@ sub bx, ax
 and bx, 01000h
 shr bx, 8
 or RegF, bl
+
+ENDM
+
+
+SetIOBlockFlagsOUT MACRO reg8ptr
+
+push x_ax
+push x_bx
+
+ResetFlagBits HF, PVF, NF, CF
+
+; SF, ZF flags Affected by decreasing register B
+mov al, RegB
+test al, al
+X86FlagsToZ80Flags SF, ZF
+
+;The N flag is a copy of bit 7 of the last value read from/written too the I/O port
+mov al, [reg8ptr]
+and al, 080h
+shr al, SF-NF
+or RegF, al
+
+; HF and CF Both set if ((HL) + L > 255)
+xor x_ax, x_ax
+xor x_bx, x_bx
+mov al, [reg8ptr]
+mov bl, RegL
+add ax, bx
+and ax, 0FF00h
+test ah, ah
+lahf
+and ah, 040h
+xor ah, 040h
+shr ah, ZF-CF
+or RegF, ah
+shl ah, HF-CF
+or RegF, ah
+
+;PF The parity of ((((HL) + L) & 7) xor B)
+xor x_ax, x_ax
+xor x_bx, x_bx
+mov al, [reg8ptr]
+mov bl, RegL
+add ax, bx
+and ax, 07h
+mov bl, RegB
+xor ax, bx
+lahf
+and ah, 04h
+or RegF, ah
+
+pop x_bx
+pop x_ax
+
+ENDM
+
+SetIOBlockFlagsIN MACRO reg8ptr, incdec
+
+push x_ax
+push x_bx
+
+ResetFlagBits HF, PVF, NF, CF
+
+; SF, ZF flags Affected by decreasing register B
+mov al, RegB
+test al, al
+X86FlagsToZ80Flags SF, ZF
+
+;The N flag is a copy of bit 7 of the last value read from/written too the I/O port
+mov al, [reg8ptr]
+and al, 080h
+shr al, SF-NF
+or RegF, al
+
+;HF and CF Both set if ((HL) + ((C +/- 1) & 255) > 255)
+xor x_ax, x_ax
+xor x_bx, x_bx
+mov al, [reg8ptr]
+mov bl, RegC
+add bl, incdec
+add ax, bx
+and ax, 0FFh
+and ax, 0FF00h
+test ah, ah
+lahf
+and ah, 040h
+xor ah, 040h
+shr ah, ZF-CF
+or RegF, ah
+shl ah, HF-CF
+or RegF, ah
+
+;PF The parity of (((HL) + ((C +/- 1) & 255)) & 7) xor B)
+xor x_ax, x_ax
+mov al, [reg8ptr]
+add al, RegC
+add al, incdec
+and al, 0FFh
+and al, 07h
+xor al, RegB
+lahf
+and ah, 04h
+or RegF, ah
+
+pop x_bx
+pop x_ax
 
 ENDM
