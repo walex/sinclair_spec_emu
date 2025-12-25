@@ -1,5 +1,66 @@
 
+.data
+
+ifdef rax
+print_text PROTO
+else
+print_text PROTO memPtr:PTR BYTE
+endif
+
 .code
+
+PUSH_GPRS MACRO
+    push rax
+    push rcx
+    push rdx
+    push rbx
+    push rbp
+    push rsi
+    push rdi
+    push r8
+    push r9
+    push r10
+    push r11
+    push r12
+    push r13
+    push r14
+    push r15
+ENDM
+
+POP_GPRS MACRO
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop r11
+    pop r10
+    pop r9
+    pop r8
+    pop rdi
+    pop rsi
+    pop rbp
+    pop rbx
+    pop rdx
+    pop rcx
+    pop rax
+ENDM
+
+PRINT_TEXT_MSG MACRO msg
+
+	LOCAL _str
+
+	.data
+	_str db msg, 0
+    .code
+
+	PUSH_GPRS
+
+    lea rcx, _str      ; RCX = const char*
+    call print_text
+	
+	POP_GPRS
+
+ENDM
 
 INC_REG_PC MACRO mem
 
@@ -86,6 +147,7 @@ GetBitMaskNeg MACRO dest, args:VARARG
 
 ENDM
 
+
 ResetFlagBits MACRO args:VARARG
 
 push x_cx
@@ -158,6 +220,7 @@ test al, al
 X86FlagsToZ80Flags SF, ZF, PVF
 ResetFlagBits HF, NF
 pop x_ax
+SetFlagBits F5, F3
 
 ENDM
 
@@ -240,7 +303,21 @@ add rcx, 2
 
 ENDM
 
-Z80HFCarryFromBit11 MACRO memptr16_a, memptr16_b, usecf
+z80CFBit11 MACRO a, b
+
+	ResetFlagBits HF
+	mov ax, a
+	mov bx, b	
+    and     ax, 0FFFh        ; keep bits 0..11
+    and     bx, 0FFFh        ; keep bits 0..11
+    add     bx, ax           ; add masked values
+	and     bx, 1000h
+    shr     bx, 12           ; move carry bit to bit 0
+	shl bl, HF
+	or RegF, bl
+ENDM
+
+z80CFBit11C MACRO memptr16_a, memptr16_b
 
 ; (((a & 0xFFF) + (b & 0xFFF)) & 0x1000) == 0x1000
 
@@ -249,14 +326,12 @@ mov ax, WORD PTR [memptr16_a]
 mov bx, WORD PTR [memptr16_b]
 and ax, 0FFFh
 and bx, 0FFFh
-IF usecf EQ 1
 push dx
 xor dx, dx
 mov dl, RegF
 and dl, 1
 add ax, dx
 pop dx
-ENDIF
 add bx, ax
 and bx, 01000h
 shr bx, 8
@@ -264,7 +339,7 @@ or RegF, bl
 
 ENDM
 
-Z80HFBorrowFromBit12 MACRO memptr16_a, memptr16_b, usecf
+z80BFBit12C MACRO memptr16_a, memptr16_b
 
 ; ((a & 0xFFF) - (b & 0xFFF)) & 0x1000) == 0x1000
 ResetFlagBits HF
@@ -272,14 +347,12 @@ mov ax, WORD PTR [memptr16_a]
 mov bx, WORD PTR [memptr16_b]
 and ax, 0FFFh
 and bx, 0FFFh
-IF usecf EQ 1
 push dx
 xor dx, dx
 mov dl, RegF
 and dl, 1
 add ax, dx
 pop dx
-ENDIF
 sub bx, ax
 and bx, 01000h
 shr bx, 8
@@ -338,6 +411,8 @@ or RegF, ah
 pop x_bx
 pop x_ax
 
+SetFlagBits F5, F3
+
 ENDM
 
 SetIOBlockFlagsIN MACRO reg8ptr, incdec
@@ -390,5 +465,28 @@ or RegF, ah
 
 pop x_bx
 pop x_ax
+
+SetFlagBits F5, F3
+
+ENDM
+
+FlagsFromReg MACRO reg, args:VARARG
+
+GetBitMask x_dx, args
+mov al, reg
+and al, dl
+not dl
+and RegF, dl
+or RegF, al
+
+ENDM
+
+ReadBit MACRO src, dest, idx
+
+mov bl, 1
+shl bl, idx
+mov dest, src
+and dest, bl
+shr dest, idx
 
 ENDM

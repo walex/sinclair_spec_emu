@@ -9,9 +9,8 @@
 #include <chrono>
 #include <time.h>
 #include "ULA.h"
-#include "kaitai/kaitaistream.h"
-#include "zx_spectrum_tap.h"
 #include <fstream>
+#include "tape.h"
 
 extern "C" int __stdcall Z80CPU(unsigned char*, double z80CycleTimeNano, double hostCPUCycleTimeNano, unsigned char* assemble);
 
@@ -21,6 +20,7 @@ static LARGE_INTEGER kStartTimer;
 static  HANDLE kTimer;
 
 const char* SPECY_ROM_PATH = "..\\..\\spec_48.rom";
+const char* TK95_ROM_PATH = "..\\..\\tk95.rom";
 const size_t RAM_48K_SIZE = 48 * 1024;
 const size_t ROM_16K_SIZE = 16 * 1024;
 const double SPEC_CPU_FREQ = 3.5;
@@ -74,51 +74,27 @@ extern "C" void __stdcall PrintType(const char* str) {
 
 }
 
-const char* MANIC_MINER_PATH = "..\\..\\manic_miner.tap";
+const char* SAMPLE_COLORS_PATH = "..\\..\\sample.tap";
+const char* MANIC_MINER_TAP_PATH = "..\\..\\manic_miner.tap";
+const char* BATMAN_TAP_PATH = "..\\..\\batman.tap";
 const char* Z80_ZEXALL_TAP_PATH = "..\\..\\zexall.tap";
 const char* Z80_ZEXALL_BIN_PATH = "..\\..\\zexall.bin";
 const char* Z80_ZEXDOC_BIN_PATH = "..\\..\\zexdoc.bin";
+// https://github.com/raxoft/z80test
+const char* Z80_TEST_SUIT_DOC__BIN_PATH = "C:\\Users\\wadrw\\Documents\\develop\\projects\\personal\\z80test\\src\\z80doc.out";
 
-void loadZexallBin(unsigned char* mem) {
+const char* CURRENT_BIN_TEST_PATH = Z80_TEST_SUIT_DOC__BIN_PATH;
+
+void runBinTest(unsigned char* mem) {
 
 	FILE* rom = nullptr;
-	fopen_s(&rom, Z80_ZEXDOC_BIN_PATH, "rb");
-	if (rom) {
+	if (!fopen_s(&rom, CURRENT_BIN_TEST_PATH, "rb") && rom) {
 		fseek(rom, 0, SEEK_END); // Move the file pointer to the end
 		size_t romSize = ftell(rom);
 		fseek(rom, 0, SEEK_SET);
 		fread(mem + 0x8000, romSize, 1, rom);
 		fclose(rom);
 	}
-}
-
-void loadTap(unsigned char* mem) {
-
-	
-	std::ifstream is(Z80_ZEXALL_TAP_PATH, std::ifstream::binary);
-	kaitai::kstream ks(&is);
-	zx_spectrum_tap_t data(&ks);
-	auto& blocks = *data.blocks();
-	
-	for (auto& block : blocks) {
-		
-		switch (block->header()->header_type()) {
-			
-		case zx_spectrum_tap_t::header_type_enum_t::HEADER_TYPE_ENUM_PROGRAM: {
-			zx_spectrum_tap_t::program_params_t* prog_params = (zx_spectrum_tap_t::program_params_t*)block->header()->params();
-			// zx spectrum 48k stores here the base address for load a basic program
-			unsigned short basic_start_addr = *((unsigned short*)(mem + 0x5C53));
-			memcpy(mem + basic_start_addr, block->data().data()+3, prog_params->len_program());
-		}
-			break;
-		case zx_spectrum_tap_t::header_type_enum_t::HEADER_TYPE_ENUM_BYTES: {
-			zx_spectrum_tap_t::bytes_params_t* bytes_params = (zx_spectrum_tap_t::bytes_params_t*)block->header()->params();
-			memcpy(mem + bytes_params->start_address(), block->data().data()+3, block->data().size()-3);
-		}
-			break;
-		}
-	}
-
 }
 
 unsigned char* createMemory(const char* romPath, size_t ramSize, size_t* romSize) {
@@ -180,10 +156,10 @@ int main(int argc, char* argv[]) {
 	
 	_T2 = new std::thread([&]() {
 
-		std::this_thread::sleep_for(std::chrono::seconds(10));
-		//loadTap(mem);
-		loadZexallBin(mem);
-
+		std::this_thread::sleep_for(std::chrono::seconds(5));
+		//loadTap(SAMPLE_COLORS_PATH, mem);
+		runBinTest(mem);
+		//tape_load_from_file(MANIC_MINER_TAP_PATH);
 		});
 		
 

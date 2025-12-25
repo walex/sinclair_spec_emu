@@ -100,25 +100,24 @@ DCB_REGISTER_FROM_MASK PROC
 ; parameters
 ; value:BYTE -> cl
 
-xor x_ax, x_ax
-mov al, cl
-and al, 07h
-cmp al , 00h
+and cl, 07h
+cmp cl , 00h
 jz mask_RegB
-cmp al , 01h
+cmp cl , 01h
 jz mask_RegC
-cmp al , 02h
+cmp cl , 02h
 jz mask_RegD
-cmp al , 03h
+cmp cl , 03h
 jz mask_RegE
-cmp al , 04h
+cmp cl , 04h
 jz mask_RegH
-cmp al , 05h
+cmp cl , 05h
 jz mask_RegL
-cmp al , 06h
-jz mask_exit	; 06h     (none: documented opcode)
-cmp al , 07h
+; 06h     (none: documented opcode)
+cmp cl , 07h
 jz mask_RegA
+xor x_ax, x_ax
+jmp mask_exit
 
 mask_RegB:
 mov x_ax, OFFSET RegB

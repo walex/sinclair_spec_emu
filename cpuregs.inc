@@ -113,9 +113,9 @@
 
 	SF EQU 7	;Bit 7 - Sign flag
 	ZF EQU 6	;Bit 6 - Zero flag
-	NOUSO5 EQU 5	;Bit 5 - documented as unused (see note)
+	F5 EQU 5	;Bit 5 - documented as unused (see note)
 	HF EQU 4	;Bit 4 - Half-carry flag
-	NOUSO3 EQU 3    ;Bit 3 - documented as unused (see note)
+	F3 EQU 3    ;Bit 3 - documented as unused (see note)
 	PVF EQU 2       ;Bit 2 - Parity/Overflow flag
 	NF EQU 1	;Bit 1 - Subtract flag
 	CF EQU 0	;Bit 0 - Carry flag

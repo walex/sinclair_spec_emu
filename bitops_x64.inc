@@ -21,6 +21,7 @@ ResetFlagBits HF, NF, PVF
 mov al, IFF2
 shl al, PVF
 or RegF, al
+SetFlagBits F5, F3
 ret
 
 LD_SetFlagIR ENDP

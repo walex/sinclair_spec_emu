@@ -166,15 +166,17 @@ include ..\..\opcodesdef.inc
 			ENDIF
 			mov memPtr, reg_pc
 			add reg_pc, r9
+Z80Halt:
+			INC_REGPC memPtr
+			jmp Op00
 Z80IsNop:
 Z80Loop:
 			invoke execute_interrupts, memPtr
 			cmp HALT, 1
-			jz Op00
+			jz Z80Halt
 			IncRegR
 			invoke ResetOpcodeTimer
 			ProcesarOpcodeFromRom _TOp1B
-
 		ELSE
 			IFDEF rax
 				mov reg_pc, rcx
@@ -849,7 +851,6 @@ Z80Loop:
        Op76:
 			 ;76		HALT			4	1	1	(repeated till next int)
 			 mov HALT,1
-			 ADD_REG_PC memPtr, -1
 			 invoke RunOpcodeTimer, 4,1
 			 jmp Z80Loop
        Op77:
@@ -1359,7 +1360,7 @@ Z80Loop:
 			invoke RunOpcodeTimer, 10,3
 			jmp Z80Loop
 
-       OpD3: 
+       OpD3:
 			; D3 OUT (n),A	11	3
 			invoke DIR_INMEDIATO, memPtr
 			xor x_bx, x_bx
@@ -1585,10 +1586,10 @@ Z80Loop:
 			  invoke RunOpcodeTimer, 12,3
 			  jmp Z80Loop	
        OpED4A:
-				;ED4A		ADC HL,BC	15 4			
-				invoke Inst_ADC16,OFFSET RegBC
-				invoke RunOpcodeTimer, 15,4
-				jmp Z80Loop
+			  ;ED4A		ADC HL,BC	15 4			
+			  invoke Inst_ADC16,OFFSET RegBC
+			  invoke RunOpcodeTimer, 15,4
+			  jmp Z80Loop
        OpED4B:
 			  ;ED4B n n	LD BC,(nn) 20 6 
 			  invoke DIR_EXT, memPtr
@@ -1857,7 +1858,6 @@ Z80Loop:
 			  invoke Inst_ADC16,OFFSET RegSP
 			  invoke RunOpcodeTimer, 15,4
 			  jmp Z80Loop
-
        OpED7B:
 			   ;ED7B n n	LD SP,(nn) 20 6 
 			   invoke DIR_EXT, memPtr
@@ -2212,25 +2212,21 @@ Z80Loop:
 			  invoke Inst_RR,OFFSET RegD
 			  invoke RunOpcodeTimer, 8,2
 			  jmp Z80Loop
-
        OpCB1B:
 			  ;CB1B		RR E			8	2	2
 			  invoke Inst_RR,OFFSET RegE
 			  invoke RunOpcodeTimer, 8,2
-			  jmp Z80Loop	
-
+			  jmp Z80Loop
        OpCB1C:
 			  ;CB1C		RR H			8	2	2
 			  invoke Inst_RR,OFFSET RegH
 			  invoke RunOpcodeTimer, 8,2
 			  jmp Z80Loop
-
        OpCB1D:
 			  ;CB1D		RR L			8	2	2
 			  invoke Inst_RR,OFFSET RegL
 			  invoke RunOpcodeTimer, 8,2
 			  jmp Z80Loop
-
        OpCB1E:
 			  ;CB1E		RR (HL)			15	4	2
 			  invoke DIR_REGISTRO_INDIRECTO,memPtr,RegHL 
@@ -3027,8 +3023,7 @@ Z80Loop:
 			  ;CBAD	 	RES 5,L			8	2	2
 			  invoke Inst_RES,OFFSET RegL,5
 			  invoke RunOpcodeTimer, 8,2
-			  jmp Z80Loop 
-
+			  jmp Z80Loop
        OpCBAE:
 			  ;CBAE	 	RES 5,(HL)		15	4	2
 			  invoke DIR_REGISTRO_INDIRECTO,memPtr,RegHL
@@ -3154,88 +3149,74 @@ Z80Loop:
 			  ; CBC2		SET 0,D			8	2	2
 			  invoke Inst_Set,OFFSET RegD,0
 			  invoke RunOpcodeTimer, 8,2
-			  jmp Z80Loop			  		
-
+			  jmp Z80Loop
        OpCBC3:
 			  ;CBC3		SET 0,E			8	2	2
 			  invoke Inst_Set,OFFSET RegE,0
 			  invoke RunOpcodeTimer, 8,2
 			  jmp Z80Loop
-
        OpCBC4:
 			  ;CBC4	 	SET 0,H			8	2	2
 			  invoke Inst_Set,OFFSET RegH,0
 			  invoke RunOpcodeTimer, 8,2
-			  jmp Z80Loop  
-
+			  jmp Z80Loop
        OpCBC5:
 			  ;CBC5	 	SET 0,L			8	2	2
 			  invoke Inst_Set,OFFSET RegL,0
 			  invoke RunOpcodeTimer, 8,2
 			  jmp Z80Loop
-
        OpCBC6:
 			 ;CBC6	 	SET 0,(HL)		15	4	2
 			 invoke DIR_REGISTRO_INDIRECTO,memPtr,RegHL
 			 invoke Inst_Set,reg_di,0
 			 invoke RunOpcodeTimer, 15,4
 			 jmp Z80Loop
-
        OpCBC7:
 			  ;CBC7	 	SET 0,A			8	2	2
 			  invoke Inst_Set,OFFSET RegA,0
 			  invoke RunOpcodeTimer, 8,2
 			  jmp Z80Loop
-
        OpCBC8:
 			 ;CBC8		SET 1,B			8	2	2
 			 invoke Inst_Set,OFFSET RegB,1
 			 invoke RunOpcodeTimer, 8,2
 			 jmp Z80Loop
-
        OpCBC9:
 			 ;CBC9	 	SET 1,C			8	2	2
 			 invoke Inst_Set,OFFSET RegC,1
 			 invoke RunOpcodeTimer, 8,2
 			 jmp Z80Loop
-
        OpCBCA:
 			 ;CBCA	 	SET 1,D			8	2	2
 			 invoke Inst_Set,OFFSET RegD,1
 			 invoke RunOpcodeTimer, 8,2
 			 jmp Z80Loop
-
        OpCBCB:
 			 ;CBCB	 	SET 1,E			8	2	2
 			 invoke Inst_Set,OFFSET RegE,1
 			 invoke RunOpcodeTimer, 8,2
 			 jmp Z80Loop
-
        OpCBCC:
 			 ;CBCC	 	SET 1,H			8	2	2
 			 invoke Inst_Set,OFFSET RegH,1
 			 invoke RunOpcodeTimer, 8,2
 			 jmp Z80Loop
-
        OpCBCD:
 			  ;CBCD	 	SET 1,L			8	2	2
 			  invoke Inst_Set,OFFSET RegL,1
 			  invoke RunOpcodeTimer, 8,2
 			  jmp Z80Loop
-
        OpCBCE:
 			  ;CBCE	 	SET 1,(HL)		15	4	2
 			  invoke DIR_REGISTRO_INDIRECTO,memPtr,RegHL
 			  invoke Inst_Set,reg_di,1
 			  invoke RunOpcodeTimer, 15,4
 			  jmp Z80Loop
-
        OpCBCF:
 			  ;CBCF	 	SET 1,A			8	2	2
 			  invoke Inst_Set,OFFSET RegA,1
 			  invoke RunOpcodeTimer, 8,2
 			  jmp Z80Loop
-
        OpCBD0:
 			  ;CBD0		SET 2,B			8	2	2
 			  invoke Inst_Set,OFFSET RegB,2
@@ -3245,7 +3226,7 @@ Z80Loop:
 			  ;CBD1	 	SET 2,C			8	2	2
 			  invoke Inst_Set,OFFSET RegC,2
 			  invoke RunOpcodeTimer, 8,2
-			  jmp Z80Loop	
+			  jmp Z80Loop
 
        OpCBD2:
 			  ;CBD2	 	SET 2,D			8	2	2
@@ -3262,32 +3243,27 @@ Z80Loop:
 			  invoke Inst_Set,OFFSET RegH,2
 			  invoke RunOpcodeTimer, 8,2
 			  jmp Z80Loop
-
        OpCBD5:
 			  ;CBD5	 	SET 2,L			8	2	2
 			  invoke Inst_Set,OFFSET RegL,2
 			  invoke RunOpcodeTimer, 8,2
 			  jmp Z80Loop
-
        OpCBD6:
 			  ;CBD6	 	SET 2,(HL)		15	4	2
 			  invoke DIR_REGISTRO_INDIRECTO,memPtr,RegHL
 			  invoke Inst_Set,reg_di,2
 			  invoke RunOpcodeTimer, 15,4
-			  jmp Z80Loop 	
-
+			  jmp Z80Loop
        OpCBD7:
 			  ;CBD7	 	SET 2,A			8	2	2
 			  invoke Inst_Set,OFFSET RegA,2
 			  invoke RunOpcodeTimer, 8,2
 			  jmp Z80Loop
-
        OpCBD8:
 			  ;CBD8		SET 3,B			8	2	2
 			  invoke Inst_Set,OFFSET RegB,3
 			  invoke RunOpcodeTimer, 8,2
 			  jmp Z80Loop
-
        OpCBD9:
 			 ;CBD9	 	SET 3,C			8	2	2
 			 invoke Inst_Set,OFFSET RegC,3
@@ -3313,7 +3289,6 @@ Z80Loop:
 		     invoke Inst_Set,OFFSET RegL,3
 			 invoke RunOpcodeTimer, 8,2
 			 jmp Z80Loop
-
        OpCBDE:
 			 ;CBDE	 	SET 3,(HL)		15	4	2
 			 invoke DIR_REGISTRO_INDIRECTO,memPtr,RegHL
@@ -3325,50 +3300,42 @@ Z80Loop:
 			 invoke Inst_Set,OFFSET RegA,3
 			 invoke RunOpcodeTimer, 8,2
 			 jmp Z80Loop
-
        OpCBE0:
 			  ;CBE0		SET 4,B			8	2	2
 			  invoke Inst_Set,OFFSET RegB,4
 			  invoke RunOpcodeTimer, 8,2
 			  jmp Z80Loop
-
        OpCBE1:
 			 ;CBE1	 	SET 4,C			8	2	2
 			 invoke Inst_Set,OFFSET RegC,4
 			 invoke RunOpcodeTimer, 8,2
 			 jmp Z80Loop
-
        OpCBE2:
 			 ;CBE2	 	SET 4,D			8	2	2
 			 invoke Inst_Set,OFFSET RegD,4
 			 invoke RunOpcodeTimer, 8,2
 			 jmp Z80Loop
-
        OpCBE3:
 			 ;CBE3	 	SET 4,E			8	2	2
 			 invoke Inst_Set,OFFSET RegE,4
 			 invoke RunOpcodeTimer, 8,2
 			 jmp Z80Loop
-
        OpCBE4:
 			 ;CBE4	 	SET 4,H			8	2	2
 			 invoke Inst_Set,OFFSET RegH,4
 			 invoke RunOpcodeTimer, 8,2
 			 jmp Z80Loop
-
        OpCBE5:
 			 ;CBE5	 	SET 4,L			8	2	2
 			 invoke Inst_Set,OFFSET RegL,4
 			 invoke RunOpcodeTimer, 8,2
 			 jmp Z80Loop
-
        OpCBE6:
 			 ;CBE6	 	SET 4,(HL)		15	4	2
 			 invoke DIR_REGISTRO_INDIRECTO,memPtr,RegHL
 			 invoke Inst_Set,reg_di,4
 			 invoke RunOpcodeTimer, 15,4
 			 jmp Z80Loop
-
        OpCBE7:
 			 ;CBE7	 	SET 4,A			8	2	2
 			 invoke Inst_Set,OFFSET RegA,4
@@ -3378,38 +3345,32 @@ Z80Loop:
 			 ;CBE8		SET 5,B			8	2	2
 			 invoke Inst_Set,OFFSET RegB,5
 			 invoke RunOpcodeTimer, 8,2
-			 jmp Z80Loop	
-
+			 jmp Z80Loop
        OpCBE9:
 			 ;CBE9	 	SET 5,C			8	2	2
 			 invoke Inst_Set,OFFSET RegC,5
 			 invoke RunOpcodeTimer, 8,2
 			 jmp Z80Loop
-
        OpCBEA:
 			 ;CBEA	 	SET 5,D			8	2	2
 			 invoke Inst_Set,OFFSET RegD,5
 			 invoke RunOpcodeTimer, 8,2
 			 jmp Z80Loop
-
        OpCBEB:
 			 ;CBEB	 	SET 5,E			8	2	2
 			 invoke Inst_Set,OFFSET RegE,5
 			 invoke RunOpcodeTimer, 8,2
 			 jmp Z80Loop
-
        OpCBEC:
 			 ;CBEC	 	SET 5,H			8	2	2
 			 invoke Inst_Set,OFFSET RegH,5
 			 invoke RunOpcodeTimer, 8,2
 			 jmp Z80Loop
-
        OpCBED:
 			 ;CBED	 	SET 5,L			8	2	2
 			 invoke Inst_Set,OFFSET RegL,5
 			 invoke RunOpcodeTimer, 8,2
 			 jmp Z80Loop
-
        OpCBEE:
 			  ;CBEE	 	SET 5,(HL)		15	4	2
 			  invoke DIR_REGISTRO_INDIRECTO,memPtr,RegHL
@@ -3425,8 +3386,7 @@ Z80Loop:
 			  ;CBF0		SET 6,B			8	2	2
 			  invoke Inst_Set,OFFSET RegB,6
 			  invoke RunOpcodeTimer, 8,2
-			  jmp Z80Loop	
-
+			  jmp Z80Loop
        OpCBF1:
 			  ;CBF1	 	SET 6,C			8	2	2
 			  invoke Inst_Set,OFFSET RegC,6
@@ -3442,19 +3402,16 @@ Z80Loop:
 			 invoke Inst_Set,OFFSET RegE,6
 			 invoke RunOpcodeTimer, 8,2
 			 jmp Z80Loop
-
        OpCBF4:
 			 ;CBF4	 	SET 6,H			8	2	2
 			 invoke Inst_Set,OFFSET RegH,6
 			 invoke RunOpcodeTimer, 8,2
 			 jmp Z80Loop
-
        OpCBF5:
 			 ;CBF5	 	SET 6,L			8	2	2
 			 invoke Inst_Set,OFFSET RegL,6
 			 invoke RunOpcodeTimer, 8,2
 			 jmp Z80Loop
-
        OpCBF6:
 			 ;CBF6	 	SET 6,(HL)		15	4	2
 		     invoke DIR_REGISTRO_INDIRECTO,memPtr,RegHL
@@ -3466,7 +3423,6 @@ Z80Loop:
 			  invoke Inst_Set,OFFSET RegA,6
 			  invoke RunOpcodeTimer, 8,2
 			  jmp Z80Loop
-
        OpCBF8:
 			  ;CBF8		SET 7,B			8	2	2
 			  invoke Inst_Set,OFFSET RegB,7
@@ -3477,7 +3433,6 @@ Z80Loop:
 			 invoke Inst_Set,OFFSET RegC,7
 			 invoke RunOpcodeTimer, 8,2
 			 jmp Z80Loop
-
        OpCBFA:
 			 ;CBFA	 	SET 7,D			8	2	2
 			 invoke Inst_Set,OFFSET RegD,7
@@ -3498,7 +3453,6 @@ Z80Loop:
 			 invoke Inst_Set,OFFSET RegL,7
 			 invoke RunOpcodeTimer, 8,2
 			 jmp Z80Loop
-
        OpCBFE:
 			 ;CBFE	 	SET 7,(HL)		15	4	2
 			 invoke DIR_REGISTRO_INDIRECTO,memPtr,RegHL
@@ -3593,7 +3547,6 @@ Z80Loop:
 			  invoke Inst_INC8,reg_di
 			  invoke RunOpcodeTimer, 23,6
 			  jmp Z80Loop
-
        OpDD35:
 			  ;DD35 d		DEC (IX+d) 23 6
 			  invoke DIR_INDEXADO,memPtr,RegIX
@@ -3952,54 +3905,54 @@ Z80Loop:
        OpDDCB:
 			   invoke DIR_INDEXADO,memPtr,RegIX
 			   ProcesarOpcodeFromRom _TOpDDCB
-	   OpDDCB00:      
-				;DDCB d 06	RLC (IX+d)  23 6
+	   OpDDCB00:
+				;DDCB d 00	RLC (IX+d)  23 6
 				invoke Inst_RLC, reg_di
 				CopyToMaskedRegOrNextOpcode 00h, [reg_di]
 				invoke RunOpcodeTimer, 23, 6
 			    jmp Z80Loop
-	   OpDDCB01:      
-				;DDCB d 06	RLC (IX+d)  23 6
+	   OpDDCB01:
+				;DDCB d 01	RLC (IX+d)  23 6
 				invoke Inst_RLC, reg_di	
 				CopyToMaskedRegOrNextOpcode 01h, [reg_di]
 				invoke RunOpcodeTimer, 23,6
 			    jmp Z80Loop
-		OpDDCB02:      
-				;DDCB d 06	RLC (IX+d)  23 6
+		OpDDCB02:
+				;DDCB d 02	RLC (IX+d)  23 6
 				invoke Inst_RLC, reg_di		
 				CopyToMaskedRegOrNextOpcode 02h, [reg_di]
 				invoke RunOpcodeTimer, 23,6
 			    jmp Z80Loop
-	   OpDDCB03:      
-				;DDCB d 06	RLC (IX+d)  23 6
+	   OpDDCB03:
+				;DDCB d 03	RLC (IX+d)  23 6
 				invoke Inst_RLC, reg_di	
 				CopyToMaskedRegOrNextOpcode 03h, [reg_di]
 				invoke RunOpcodeTimer, 23,6
 			    jmp Z80Loop
-	   OpDDCB04:      
-				;DDCB d 06	RLC (IX+d)  23 6
+	   OpDDCB04:
+				;DDCB d 04	RLC (IX+d)  23 6
 				invoke Inst_RLC, reg_di
 				CopyToMaskedRegOrNextOpcode 04h, [reg_di]
 				invoke RunOpcodeTimer, 23,6
 			    jmp Z80Loop
-	   OpDDCB05:      
-				;DDCB d 06	RLC (IX+d)  23 6
+	   OpDDCB05:
+				;DDCB d 05	RLC (IX+d)  23 6
 				invoke Inst_RLC, reg_di		
 				CopyToMaskedRegOrNextOpcode 05h, [reg_di]
 				invoke RunOpcodeTimer, 23,6
 			    jmp Z80Loop
-		OpDDCB06:      
+		OpDDCB06:
 				;DDCB d 06	RLC (IX+d)  23 6
 				invoke Inst_RLC, reg_di	
 				invoke RunOpcodeTimer, 23,6
 			    jmp Z80Loop
-	   OpDDCB07:      
-				;DDCB d 06	RLC (IX+d)  23 6
+	   OpDDCB07:
+				;DDCB d 07	RLC (IX+d)  23 6
 				invoke Inst_RLC, reg_di		
 				CopyToMaskedRegOrNextOpcode 07h, [reg_di]
 				invoke RunOpcodeTimer, 23,6
 			    jmp Z80Loop
-	   OpDDCB08:   
+	   OpDDCB08:
 				;RRC  (IX+nn)   &  LD   B,(IX+nn)	
 				invoke Inst_RRC, reg_di	
 				CopyToMaskedRegOrNextOpcode 08h, [reg_di]
@@ -4010,7 +3963,7 @@ Z80Loop:
 			    invoke Inst_RRC, reg_di
 				invoke RunOpcodeTimer, 15,4
 			    jmp Z80Loop
-	   OpDDCB10:   
+	   OpDDCB10:
 				;RL   (IX+nn)   &  LD   B,(IX+nn)
 				invoke Inst_RL, reg_di		
 				CopyToMaskedRegOrNextOpcode 10h, [reg_di]
@@ -4021,7 +3974,7 @@ Z80Loop:
 				invoke Inst_RL,reg_di 
 				invoke RunOpcodeTimer, 23,6
 			    jmp Z80Loop
-	   OpDDCB18:   
+	   OpDDCB18:
 				;RR   (IX+nn)   &  LD   B,(IX+nn)
 				invoke Inst_RR, reg_di	
 				CopyToMaskedRegOrNextOpcode 18h, [reg_di]
@@ -4032,7 +3985,7 @@ Z80Loop:
 				invoke Inst_RR,reg_di
 				invoke RunOpcodeTimer, 23,6
 			    jmp Z80Loop
-	   OpDDCB20:   
+	   OpDDCB20:
 				;SLA  (IX+nn)   &  LD   B,(IX+nn)
 				invoke Inst_SLA, reg_di	
 				CopyToMaskedRegOrNextOpcode 20h, [reg_di]
@@ -4043,7 +3996,7 @@ Z80Loop:
 				invoke Inst_SLA,reg_di
 				invoke RunOpcodeTimer, 23,6
 			    jmp Z80Loop
-	   OpDDCB28:   
+	   OpDDCB28:
 				;SRA  (IX+nn)   &  LD   B,(IX+nn)
 				invoke Inst_SRA, reg_di
 				CopyToMaskedRegOrNextOpcode 28h, [reg_di]
@@ -4060,7 +4013,7 @@ Z80Loop:
 				CopyToMaskedRegOrNextOpcode 30h, [reg_di]
 				invoke RunOpcodeTimer, 23,6
 			    jmp Z80Loop
-	   OpDDCB38:   
+	   OpDDCB38:
 				;SRL  (IX+nn)   &  LD   B,(IX+nn)
 				invoke Inst_SRL, reg_di
 				CopyToMaskedRegOrNextOpcode 38h, [reg_di]
@@ -4113,7 +4066,7 @@ Z80Loop:
 				invoke Inst_BIT,reg_di,7
 				invoke RunOpcodeTimer, 20,5
 				jmp Z80Loop
-	   OpDDCB80:   
+	   OpDDCB80:
 				;RES  0,(IX+nn) &  LD   B,(IX+nn)
 				invoke Inst_RES,reg_di,0
 				CopyToMaskedRegOrNextOpcode 80h, [reg_di]
@@ -4124,7 +4077,7 @@ Z80Loop:
 				invoke Inst_RES,reg_di,0
 				invoke RunOpcodeTimer, 20,5
 				jmp Z80Loop
-	   OpDDCB88:   
+	   OpDDCB88:
 				;RES  1,(IX+nn) &  LD   B,(IX+nn)
 				invoke Inst_RES,reg_di,1
 				CopyToMaskedRegOrNextOpcode 88h, [reg_di]
@@ -4135,7 +4088,7 @@ Z80Loop:
 				invoke Inst_RES,reg_di,1
 				invoke RunOpcodeTimer, 23,6
 				jmp Z80Loop
-	   OpDDCB90:   
+	   OpDDCB90:
 				;RES  2,(IX+nn) &  LD   B,(IX+nn)
 				invoke Inst_RES,reg_di,2
 				CopyToMaskedRegOrNextOpcode 90h, [reg_di]
@@ -4146,7 +4099,7 @@ Z80Loop:
 				invoke Inst_RES,reg_di,2
 				invoke RunOpcodeTimer, 23,6
 				jmp Z80Loop
-	   OpDDCB98:   
+	   OpDDCB98:
 				;RES  3,(IX+nn) &  LD   B,(IX+nn)
 				invoke Inst_RES,reg_di,3
 				CopyToMaskedRegOrNextOpcode 98h, [reg_di]
@@ -4157,7 +4110,7 @@ Z80Loop:
 				invoke Inst_RES,reg_di,3
 				invoke RunOpcodeTimer, 23,6 
 				jmp Z80Loop
-	   OpDDCBA0:   
+	   OpDDCBA0:
 				;RES  4,(IX+nn) &  LD   B,(IX+nn)
 				invoke Inst_RES,reg_di,4
 				CopyToMaskedRegOrNextOpcode 0A0h, [reg_di]
@@ -4168,7 +4121,7 @@ Z80Loop:
 				invoke Inst_RES,reg_di,4
 				invoke RunOpcodeTimer, 23,6
 				jmp Z80Loop
-	   OpDDCBA8:   
+	   OpDDCBA8:
 				;RES  5,(IX+nn) &  LD   B,(IX+nn)
 				invoke Inst_RES,reg_di,5
 				CopyToMaskedRegOrNextOpcode 0A8h, [reg_di]
@@ -4179,7 +4132,7 @@ Z80Loop:
 				invoke Inst_RES,reg_di,5
 				invoke RunOpcodeTimer, 23,6
 				jmp Z80Loop
-	   OpDDCBB0:   
+	   OpDDCBB0:
 				;RES  6,(IX+nn) &  LD   B,(IX+nn)
 				invoke Inst_RES,reg_di,6
 				CopyToMaskedRegOrNextOpcode 0B0h, [reg_di]
@@ -4190,7 +4143,7 @@ Z80Loop:
 				invoke Inst_RES,reg_di,6
 				invoke RunOpcodeTimer, 23,6
 				jmp Z80Loop
-	   OpDDCBB8:   
+	   OpDDCBB8:
 				;RES  7,(IX+nn) &  LD   B,(IX+nn)
 				invoke Inst_RES,reg_di,7
 				CopyToMaskedRegOrNextOpcode 0B8h, [reg_di]
@@ -4201,7 +4154,7 @@ Z80Loop:
 				invoke Inst_RES,reg_di,7
 				invoke RunOpcodeTimer, 23,6
 				jmp Z80Loop
-	   OpDDCBC0:   
+	   OpDDCBC0:
 				;SET  0,(IX+nn) &  LD   B,(IX+nn)
 				invoke Inst_Set,reg_di,0
 				CopyToMaskedRegOrNextOpcode 0C0h, [reg_di]
@@ -4212,7 +4165,7 @@ Z80Loop:
 				invoke Inst_Set,reg_di,0
 				invoke RunOpcodeTimer, 23,6
 				jmp Z80Loop
-	   OpDDCBC8:   
+	   OpDDCBC8:
 				;SET  1,(IX+nn) &  LD   B,(IX+nn)
 				invoke Inst_Set,reg_di,1
 				CopyToMaskedRegOrNextOpcode 0C8h, [reg_di]
@@ -4223,7 +4176,7 @@ Z80Loop:
 				invoke Inst_Set,reg_di,1
 				invoke RunOpcodeTimer, 23,6
 				jmp Z80Loop
-	   OpDDCBD0:   
+	   OpDDCBD0:
 				;SET  2,(IX+nn) &  LD   B,(IX+nn)
 				invoke Inst_Set,reg_di,2
 				CopyToMaskedRegOrNextOpcode 0D0h, [reg_di]
@@ -4234,7 +4187,7 @@ Z80Loop:
 				invoke Inst_Set,reg_di,2
 				invoke RunOpcodeTimer, 23,6
 				jmp Z80Loop
-	   OpDDCBD8:   
+	   OpDDCBD8:
 				;SET  3,(IX+nn) &  LD   B,(IX+nn)
 				invoke Inst_Set,reg_di,3
 				CopyToMaskedRegOrNextOpcode 0D8h, [reg_di]
@@ -4245,7 +4198,7 @@ Z80Loop:
 				invoke Inst_Set,reg_di,3
 				invoke RunOpcodeTimer, 23,6
 				jmp Z80Loop
-	    OpDDCBE0:   
+	    OpDDCBE0:
 				;SET  4,(IX+nn) &  LD   B,(IX+nn)
 				invoke Inst_Set,reg_di,4
 				CopyToMaskedRegOrNextOpcode 0E0h, [reg_di]
@@ -4256,7 +4209,7 @@ Z80Loop:
 				invoke Inst_Set,reg_di,4
 				invoke RunOpcodeTimer, 23,6
 				jmp Z80Loop
-	   OpDDCBE8:   
+	   OpDDCBE8:
 				;SET  5,(IX+nn) &  LD   B,(IX+nn)
 				invoke Inst_Set,reg_di,5
 				CopyToMaskedRegOrNextOpcode 0E8h, [reg_di]
@@ -4267,7 +4220,7 @@ Z80Loop:
 				invoke Inst_Set,reg_di,5
 				invoke RunOpcodeTimer, 23,6
 				jmp Z80Loop
-	   OpDDCBF0:   
+	   OpDDCBF0:
 				;SET  6,(IX+nn) &  LD   B,(IX+nn)
 				invoke Inst_Set,reg_di,6
 				CopyToMaskedRegOrNextOpcode 0F0h, [reg_di]
@@ -4278,14 +4231,14 @@ Z80Loop:
 				invoke Inst_Set,reg_di,6
 				invoke RunOpcodeTimer, 23,6 
 				jmp Z80Loop
-	   OpDDCBF8:   
+	   OpDDCBF8:
 				;SET  6,(IX+nn) &  LD   B,(IX+nn)
 				invoke Inst_Set,reg_di,7
 				CopyToMaskedRegOrNextOpcode 0F8h, [reg_di]
 				invoke RunOpcodeTimer, 20,5
 				jmp Z80Loop	
-       OpDDCBFE:      
- 				;DDCB d FE	SET 7,(IX+d) 23 6				
+       OpDDCBFE:
+				;DDCB d FE	SET 7,(IX+d) 23 6				
 				invoke Inst_Set,reg_di,7
 				invoke RunOpcodeTimer, 23,6
 				jmp Z80Loop
@@ -4637,7 +4590,7 @@ Z80Loop:
 			invoke RunOpcodeTimer, 8,2
 			jmp Z80Loop
        OpFD85:
-			;FD85		ADD A,IYL			8	2
+			 ;FD85		ADD A,IYL			8	2
 			 invoke Inst_ADD8,OFFSET RegIYL
 			 invoke RunOpcodeTimer, 8,2
 			 jmp Z80Loop	
@@ -4763,7 +4716,7 @@ Z80Loop:
        OpFDCB:
 			   invoke DIR_INDEXADO,memPtr,RegIY
 			   ProcesarOpcodeFromRom _TOpFDCB
-	   OpFDCB06:      
+	   OpFDCB06:
 				;FDCB d 06	RLC (IY+d) 23 6
 				invoke Inst_RLC,reg_di
 				invoke RunOpcodeTimer, 23,6
@@ -4895,7 +4848,6 @@ Z80Loop:
 				invoke Inst_Set,reg_di,2
 				invoke RunOpcodeTimer, 23,6
 				jmp Z80Loop
-
        OpFDCBDE:
 				;FDCB d DE	SET 3,(IY+d) 23 6				
 				invoke Inst_Set,reg_di,3
@@ -4911,14 +4863,13 @@ Z80Loop:
 				invoke Inst_Set,reg_di,5
 				invoke RunOpcodeTimer, 23,6
 				jmp Z80Loop
-
        OpFDCBF6:
 				;FDCB d F6	SET 6,(IY+d) 23 6				
 				invoke Inst_Set,reg_di,6
 				invoke RunOpcodeTimer, 23,6
 				jmp Z80Loop
-       OpFDCBFE:      
- 				;FDCB d FE	SET 7,(IY+d) 23 6				
+       OpFDCBFE:
+				;FDCB d FE	SET 7,(IY+d) 23 6				
 				invoke Inst_Set,reg_di,7
 				invoke RunOpcodeTimer, 23,6
 				jmp Z80Loop 
@@ -4940,12 +4891,12 @@ Z80Loop:
 			  invoke RunOpcodeTimer, 23,6
 			  jmp Z80Loop 	
        OpFDE5:
-			    ;FDE5		PUSH IY 15 4
+			   ;FDE5		PUSH IY 15 4
 			   invoke Inst_PUSH,memPtr,RegIY
 			   invoke RunOpcodeTimer, 15,4
 			   jmp Z80Loop
        OpFDE9:
-			 ;FDE9		JP (IY) 8 2
+			   ;FDE9		JP (IY) 8 2
 			   invoke Inst_JP,memPtr,RegIY
 			   invoke RunOpcodeTimer, 8,2
 			   jmp Z80Loop

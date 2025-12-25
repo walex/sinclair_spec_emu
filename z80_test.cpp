@@ -15,6 +15,7 @@
 #include <fstream>
 #include "kaitai/kaitaistream.h"
 #include "zx_spectrum_tap.h"
+#include "optable.h"
 
 extern "C" int __stdcall Z80CPU(unsigned char*, double z80CycleTimeNano, double hostCPUCycleTimeNano, unsigned char* assemble);
 extern "C" void __stdcall InitRegisters(unsigned short*);
@@ -32,7 +33,7 @@ const char* Z80_ZEXALL_TAP_PATH = "..\\..\\zexall.tap";
 const char* Z80_ZEXALL_BIN_PATH = "..\\..\\zexall.bin";
 const char* Z80_ZEXDOC_BIN_PATH = "..\\..\\zexdoc.bin";
 const char* MANIC_MINER_PATH = "..\\..\\manic_miner.tap";
-const char* TEST_CASES_PATH = "..\\..\\..\\test2\\test_cases.txt";
+const char* TEST_CASES_PATH = "C:\\Users\\wadrw\\Documents\\develop\\projects\\personal\\sinclair_spec_emu\\test\\json";
 const size_t ROM_128K_SIZE = 128 * 1024;
 const size_t RAM_48K_SIZE = 48 * 1024;
 const size_t ROM_16K_SIZE = 16 * 1024;
@@ -200,14 +201,22 @@ void getZ80AndHostCPUFreq(double& z80CpuCycleTimeInNanoseconds, double& hostCpuC
 	z80CpuCycleTimeInNanoseconds = calculate_cycle_time_nanosecs(SPEC_CPU_FREQ);
 }
 
-void test_opcode(const char* test_name, unsigned char* mem, std::vector<unsigned short int>& parameters) {
-	
+void print_registers(const std::vector<unsigned short int>& regs) {
+
+	for (int i = 0; i < regs.size(); i++) {
+
+		printf("%s -> %X\n", reg_names[i], regs[i]);
+	}
+}
+
+void test_opcode(const char* test_name, unsigned char* mem, std::vector<unsigned short int>& parameters, bool print_regs = false) {
+
 	// Create a new vector with the first REGISTERS_COUNT elements
 	std::vector<unsigned short int> init_data(parameters.begin(), parameters.begin() + REGISTERS_COUNT);
 	std::vector<unsigned short int> result_data(REGISTERS_COUNT);
 
 	InitRegisters(init_data.data());
-	
+
 	// Erase the first REGISTERS_COUNT elements from the original vector
 	parameters.erase(parameters.begin(), parameters.begin() + REGISTERS_COUNT);
 	
@@ -225,17 +234,17 @@ void test_opcode(const char* test_name, unsigned char* mem, std::vector<unsigned
 
 	// read port data
 	clear_io_test_data();
-	// Copy initial ram data
-	unsigned short int port_positions_count = (parameters[0] * 2);
+	// Copy port data
+	unsigned short int port_positions_count = (parameters[0] * 3);
 	// Erase port_positions_count from parameters
 	parameters.erase(parameters.begin(), parameters.begin() + 1);
 	// init port mem
-	for (unsigned short int i = 0; i < port_positions_count; i += 2) {
+	for (unsigned short int i = 0; i < port_positions_count; i += 3) {
 
 		put_io_next_test_data(parameters[i], (unsigned char)parameters[i + 1]);
 	}
 
-	// Erase por data so parametes will have only the last REGISTERS_COUNT elements + result ram data
+	// Erase port data so parametes will have only the last REGISTERS_COUNT elements + result ram data
 	parameters.erase(parameters.begin(), parameters.begin() + port_positions_count);
 
 	// get cpus cycle time
@@ -284,19 +293,26 @@ void test_opcode(const char* test_name, unsigned char* mem, std::vector<unsigned
 
 		//printf("Test passed ok!\n");
 	}
+	else {
+
+		if (print_regs)
+		{
+			printf("--------------- Init data --------------------------\n");
+			print_registers(init_data);
+			printf("--------------- Result data --------------------------\n");
+			print_registers(result_data);
+			printf("-----------------------------------------\n");
+		}
+	}
 }
 
-int run_test_cases() {
+#include <filesystem>
+#include <iostream>
+
+void run_test_case(FILE* file, double kZ80CpuCycleTimeInNanoseconds, double kHostCpuCycleTimeInNanoseconds) {
 
 	unsigned char mem[ROM_128K_SIZE];
 	
-	getZ80AndHostCPUFreq(kZ80CpuCycleTimeInNanoseconds, kHostCpuCycleTimeInNanoseconds);
-
-	FILE* file = fopen(TEST_CASES_PATH, "r");
-	if (file == NULL) {
-		printf("Error opening file.\n");
-		return -1;
-	}
 	char line[MAX_LINE_LENGTH+1];
 	
 	// Read each line from the file
@@ -305,7 +321,7 @@ int run_test_cases() {
 		static int op_cnt = 0;
 		++op_cnt;		
 
-		/*if (op_cnt == 0x00008e7b) {
+		/*if (op_cnt == 0x00002329) {
 			op_cnt = op_cnt;
 		}*/
 
@@ -315,21 +331,46 @@ int run_test_cases() {
 		char* token = strtok(line, ";");  // Split by space, tab, or newline
 		char test_name[64];
 		int param_cnt = 0;
+		bool show_info = false;
+		const char* show_test_name = "ED 4A 0000";
 		while (token != NULL) {
 			if (param_cnt++ == 0) {
 				
 				strcpy(test_name, token);
 				token = strtok(NULL, ";");
+
+				show_info = !strcmp(test_name, show_test_name);
+
 				continue;
 			}
 			char* endptr;
 			parameters.push_back((unsigned int)strtoul(token, &endptr, 10));
 			token = strtok(NULL, ";");
 		}
-		test_opcode(test_name, mem, parameters);
+		test_opcode(test_name, mem, parameters, show_info);
 	}
-	fclose(file);
-	return 0;
+	
+}
+
+void process_tests() {
+
+	getZ80AndHostCPUFreq(kZ80CpuCycleTimeInNanoseconds, kHostCpuCycleTimeInNanoseconds);
+
+	const std::string path = TEST_CASES_PATH;
+	for (const auto& entry : std::filesystem::directory_iterator(path)) {
+		if (entry.path().extension() == ".txt") {
+			std::string test_path = entry.path().string().c_str();
+			FILE* file = fopen(test_path.c_str(), "r");
+			if (file == NULL) {
+				printf("Error opening file %s.\n", test_path.c_str());
+				return;
+			}
+			run_test_case(file, kZ80CpuCycleTimeInNanoseconds, kHostCpuCycleTimeInNanoseconds);
+
+			fclose(file);
+		}
+	}
+
 }
 
 int run_zexall_test() {
@@ -346,7 +387,12 @@ int main(int argc, char* argv[]) {
 	
 	
 	//return run_zexall_test();
-	return run_test_cases();
+	process_tests();
 	//return load_tap();
+	return 0;
+}
+
+extern "C" void __stdcall print_text(const char* str) {
+		printf("%s\n", str);
 }
 #endif

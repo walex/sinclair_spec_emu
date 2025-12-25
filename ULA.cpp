@@ -1,6 +1,7 @@
 #include "ULA.h"
 #include "display.h"
 #include "keyboard.h"
+#include "tape.h"
 
 const int PAL_FPS = 1000 / 25;
 /*
@@ -34,6 +35,9 @@ void ula_read(unsigned short int addr, unsigned char* value) {
 	case 0x7FFE:
 		key = ((addr & 0xFF00) >> 8);
 		*value = keyboard_getKeyMap(key);
+		break;
+	case 0x0FFE:
+		*value = read_from_tape();
 		break;
 	default:
 		*value = 0;

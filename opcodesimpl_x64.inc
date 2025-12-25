@@ -113,6 +113,7 @@ Inst_LDI PROC
 
 invoke DIR_REGISTRO_INDIRECTO,x_cx,RegHL
 mov al,[reg_di]
+push x_ax
 invoke DIR_REGISTRO_INDIRECTO,x_cx,RegDE
 mov [reg_di],al
 inc RegDE
@@ -120,6 +121,13 @@ inc RegHL
 dec RegBC
 SetPVFromBC
 ResetFlagBits HF, NF
+
+;--*0**0-  PV set if BC not 0
+;F5 is bit 1 of (transferred byte + A)
+;F3 is bit 3 of (transferred byte + A)
+pop x_ax
+add al, RegA
+FlagsFromReg al, F5, F3
 ret
 
 Inst_LDI ENDP
@@ -142,6 +150,7 @@ jmp LDIR_exit
 LDIR_end:
 invoke RunOpcodeTimer, 16,4
 LDIR_exit:
+
 ret
 
 Inst_LDIR ENDP
@@ -153,6 +162,7 @@ Inst_LDD PROC
 
 invoke DIR_REGISTRO_INDIRECTO,x_cx,RegHL
 mov al,[reg_di]
+push x_ax
 invoke DIR_REGISTRO_INDIRECTO,x_cx,RegDE
 mov [reg_di],al
 dec RegDE
@@ -160,6 +170,12 @@ dec RegHL
 dec RegBC
 SetPVFromBC
 ResetFlagBits HF, NF
+;--*0**0-  PV set if BC not 0
+;F5 is bit 1 of (transferred byte + A)
+;F3 is bit 3 of (transferred byte + A)
+pop x_ax
+add al, RegA
+FlagsFromReg al, F5, F3
 ret
 
 Inst_LDD ENDP
@@ -199,6 +215,21 @@ inc RegHL
 dec RegBC
 SetPVFromBC
 SetFlagBits NF
+; SZ*H**1-  PV set if BC not 0
+; S,Z,H from (A - (HL) ) as in CP (HL)
+; F3 is bit 3 of (A - (HL) - H), H as in F after instruction
+; F5 is bit 1 of (A - (HL) - H), H as in F after instruction
+; CPI instructions are weird too. The test is simply like a CP (HL). Flag 3 and
+; 5 are set like this: Take A, subtract the last (HL), and then decrease it
+; with 1 if the H flag was set (/after/ the CP). Bit 1 of this value is flag
+; 5, bit 3 is flag 3.
+
+invoke DIR_REGISTRO_INDIRECTO,x_cx,RegHL
+mov al, RegA
+sub al, BYTE PTR [reg_di]
+ReadBit RegF, bl, HF
+sub al, bl
+FlagsFromReg al, F5, F3
 ret
 
 Inst_CPI ENDP
@@ -240,6 +271,21 @@ cmp RegA,bl
 X86FlagsToZ80Flags SF, ZF, HF
 SetPVFromBC
 SetFlagBits NF
+; SZ*H**1-  PV set if BC not 0
+; S,Z,H from (A - (HL) ) as in CP (HL)
+; F3 is bit 3 of (A - (HL) - H), H as in F after instruction
+; F5 is bit 1 of (A - (HL) - H), H as in F after instruction
+; CPI instructions are weird too. The test is simply like a CP (HL). Flag 3 and
+; 5 are set like this: Take A, subtract the last (HL), and then decrease it
+; with 1 if the H flag was set (/after/ the CP). Bit 1 of this value is flag
+; 5, bit 3 is flag 3.
+
+invoke DIR_REGISTRO_INDIRECTO,x_cx,RegHL
+mov al, RegA
+sub al, BYTE PTR [reg_di]
+ReadBit RegF, bl, HF
+sub al, bl
+FlagsFromReg al, F5, F3
 ret
 
 Inst_CPD ENDP
@@ -278,6 +324,8 @@ mov al,[x_cx]
 add RegA, al
 X86FlagsToZ80Flags SF, ZF, HF, OF, CF
 ResetFlagBits NF
+; SZ5H3VNC
+SetFlagBits F5, F3
 ret
 
 Inst_ADD8 ENDP
@@ -292,6 +340,8 @@ LoadZ80CarryFlag
 adc RegA, al
 X86FlagsToZ80Flags SF, ZF, HF, OF, CF
 ResetFlagBits NF
+; SZ5H3VNC
+SetFlagBits F5, F3
 ret
 
 Inst_ADC8 ENDP
@@ -305,6 +355,8 @@ mov al,[x_cx]
 sub RegA,al
 X86FlagsToZ80Flags SF, ZF, HF, OF, CF
 SetFlagBits NF
+; SZ5H3VNC
+SetFlagBits F5, F3
 ret
 
 Inst_SUB ENDP
@@ -319,6 +371,8 @@ mov al,[x_cx]
 sbb RegA, al
 X86FlagsToZ80Flags SF, ZF, HF, OF, CF
 SetFlagBits NF
+; SZ5H3VNC
+SetFlagBits F5, F3
 ret
 
 Inst_SBC8 ENDP
@@ -333,6 +387,8 @@ and RegA,cl
 X86FlagsToZ80Flags SF, ZF, PVF
 SetFlagBits HF
 mov al, RegF
+; SZ513P00
+SetFlagBits F5, F3
 ret
 
 Inst_AND ENDP
@@ -345,6 +401,8 @@ Inst_OR PROC
 ResetFlagBits SF, ZF, HF, NF, PVF, CF
 or RegA,cl
 X86FlagsToZ80Flags SF, ZF, PVF
+; SZ503P00
+SetFlagBits F5, F3
 ret
 
 Inst_OR ENDP
@@ -357,6 +415,8 @@ Inst_XOR PROC
 xor RegA,cl		
 X86FlagsToZ80Flags SF, ZF, PVF
 ResetFlagBits HF, NF, CF
+; SZ503P00
+SetFlagBits F5, F3
 ret
 
 Inst_XOR ENDP
@@ -366,10 +426,22 @@ Inst_CP PROC
 ; parameters
 ; Reg:PTR BYTE -> x_cx
 
+push x_cx
+
 mov al,[x_cx]
 cmp RegA,al
+
 X86FlagsToZ80Flags SF, ZF, HF, OF, CF
 SetFlagBits NF
+
+pop x_cx
+
+; SZ*H*VNC  CP is just SUB with the result thrown away
+; F5 and F3 are copied from the operand, not the result
+
+
+FlagsFromReg [x_cx], F5, F3
+
 ret
 
 Inst_CP ENDP
@@ -382,6 +454,8 @@ Inst_INC8 PROC
 inc BYTE PTR [x_cx]
 X86FlagsToZ80Flags SF, ZF, HF, OF
 ResetFlagBits NF
+; SZ5H3VN-
+SetFlagBits F5, F3
 ret
 
 Inst_INC8 ENDP
@@ -394,6 +468,8 @@ Inst_DEC8 PROC
 dec BYTE PTR [x_cx]
 X86FlagsToZ80Flags SF, ZF, HF, OF
 SetFlagBits NF
+; SZ5H3VN-
+SetFlagBits F5, F3
 ret
 
 Inst_DEC8 ENDP
@@ -411,6 +487,8 @@ pop x_cx
 pop x_bp
 pop reg_si
 pop reg_pc
+;SZ5*3P-*
+SetFlagBits F5, F3
 ret
 
 Inst_DAA ENDP
@@ -419,6 +497,8 @@ Inst_CPL PROC
 
 not RegA
 SetFlagBits HF, NF
+; --*1*-1-	F5, F3 from A register
+FlagsFromReg RegA, F5, F3
 ret
 
 Inst_CPL ENDP
@@ -428,6 +508,8 @@ Inst_NEG PROC
 neg RegA
 X86FlagsToZ80Flags SF, ZF, HF, OF, CF
 SetFlagBits NF
+; SZ5H3V1C
+SetFlagBits F5, F3
 ret
 
 Inst_NEG ENDP
@@ -441,6 +523,9 @@ and ah, cl
 shl ah, HF
 xor RegF, 1
 or RegF, ah
+; --***-0*
+; F5, F3 from A register
+FlagsFromReg RegA, F5, F3
 ret
 
 Inst_CCF ENDP
@@ -449,6 +534,8 @@ Inst_SCF PROC
 
 ResetFlagBits HF, NF
 SetFlagBits CF
+; --*0*-01	F5, F3 from A register
+FlagsFromReg RegA, F5, F3
 ret
 
 Inst_SCF ENDP
@@ -459,11 +546,17 @@ Inst_ADD16 PROC
 ; Reg_Ori:PTR WORD -> x_cx
 ; Reg_Dest:PTR WORD -> x_dx
 
-Z80HFCarryFromBit11 x_cx, x_dx, 0
-mov bx, WORD PTR [x_cx]
-add WORD PTR [x_dx],bx
+mov ax, WORD PTR [x_cx]
+mov bx, WORD PTR [x_dx]
+push bx
+add bx, ax
 X86FlagsToZ80Flags CF
+mov WORD PTR [x_dx], bx
 ResetFlagBits NF
+pop bx
+z80CFBit11 ax, bx
+; SZ***VNC  F5,H,F3 from higher bytes addition
+;FlagsFromReg RegH, F5, HF, F3
 ret
 
 Inst_ADD16 ENDP
@@ -474,7 +567,7 @@ Inst_ADC16 PROC
 ; Reg_Ori:PTR WORD -> x_cx
 
 mov x_dx, OFFSET RegHL
-Z80HFCarryFromBit11 x_cx, x_dx, 1
+z80CFBit11C x_cx, x_dx
 LoadZ80CarryFlag
 mov ax, WORD PTR [x_cx]	
 adc RegHL,ax
@@ -490,7 +583,7 @@ Inst_SBC16 PROC
 ; Reg_Ori:PTR WORD -> x_cx
 
 mov x_dx, OFFSET RegHL
-Z80HFBorrowFromBit12 x_cx, x_dx, 1
+z80BFBit12C x_cx, x_dx
 LoadZ80CarryFlag
 mov ax,WORD PTR [x_cx]	
 sbb RegHL,ax
@@ -499,6 +592,7 @@ SetFlagBits NF
 ret
 
 Inst_SBC16 ENDP
+
 
 Inst_INC16 PROC
 
@@ -525,6 +619,8 @@ Inst_RLCA PROC
 rol RegA,1
 X86FlagsToZ80Flags CF
 ResetFlagBits HF, NF
+;--503-0C
+SetFlagBits F5, F3
 ret
 
 Inst_RLCA ENDP
@@ -535,6 +631,8 @@ LoadZ80CarryFlag
 rcl RegA,1
 X86FlagsToZ80Flags CF
 ResetFlagBits HF, NF
+;--503-0C
+SetFlagBits F5, F3
 ret
 
 Inst_RLA ENDP
@@ -544,6 +642,8 @@ Inst_RRCA PROC
 ror RegA,1
 X86FlagsToZ80Flags CF
 ResetFlagBits HF, NF
+;--503-0C
+SetFlagBits F5, F3
 ret
 
 Inst_RRCA ENDP
@@ -554,6 +654,8 @@ LoadZ80CarryFlag
 rcr RegA,1
 X86FlagsToZ80Flags CF
 ResetFlagBits HF, NF
+;--503-0C
+SetFlagBits F5, F3
 ret
 
 Inst_RRA ENDP
@@ -570,6 +672,8 @@ X86FlagsToZ80Flags CF
 test bl, bl
 X86FlagsToZ80Flags SF, ZF, PVF
 ResetFlagBits HF, NF
+;SZ503P0C
+SetFlagBits F5, F3
 ret
 
 Inst_RLC ENDP
@@ -587,6 +691,8 @@ X86FlagsToZ80Flags CF
 test bl, bl
 X86FlagsToZ80Flags SF, ZF, PVF
 ResetFlagBits HF, NF
+;SZ503P0C
+SetFlagBits F5, F3
 ret
 
 Inst_RL ENDP
@@ -603,6 +709,8 @@ X86FlagsToZ80Flags CF
 test bl, bl
 X86FlagsToZ80Flags SF, ZF, PVF
 ResetFlagBits HF, NF
+;SZ503P0C
+SetFlagBits F5, F3
 ret
 
 Inst_RRC ENDP
@@ -620,6 +728,8 @@ X86FlagsToZ80Flags CF
 test bl, bl
 X86FlagsToZ80Flags SF, ZF, PVF
 ResetFlagBits HF, NF
+;SZ503P0C
+SetFlagBits F5, F3
 ret
 
 Inst_RR ENDP
@@ -636,6 +746,8 @@ X86FlagsToZ80Flags CF
 test bl, bl
 X86FlagsToZ80Flags SF, ZF, PVF
 ResetFlagBits HF, NF
+;SZ503P0C
+SetFlagBits F5, F3
 ret
 
 Inst_SLA ENDP
@@ -661,7 +773,8 @@ mov [x_cx],bl
 test bl, bl
 X86FlagsToZ80Flags SF, ZF, PVF
 or RegF, dl
-
+;SZ503P0C
+SetFlagBits F5, F3
 ret
 
 Inst_SLL ENDP
@@ -678,6 +791,8 @@ X86FlagsToZ80Flags CF
 test bl, bl
 X86FlagsToZ80Flags SF, ZF, PVF
 ResetFlagBits HF, NF
+;SZ503P0C
+SetFlagBits F5, F3
 ret
 
 Inst_SRA ENDP
@@ -694,6 +809,8 @@ X86FlagsToZ80Flags CF
 test bl, bl
 X86FlagsToZ80Flags ZF, PVF
 ResetFlagBits SF, HF, NF
+;SZ503P0C
+SetFlagBits F5, F3
 ret
 
 Inst_SRL ENDP
@@ -727,6 +844,8 @@ mov RegA, ch
 test ch, ch
 X86FlagsToZ80Flags SF, ZF, PVF
 ResetFlagBits HF, NF
+;SZ503P0
+SetFlagBits F5, F3
 ret
 
 Inst_RLD ENDP
@@ -763,6 +882,8 @@ mov [reg_di], al
 test cl, cl
 X86FlagsToZ80Flags SF, ZF, PVF
 ResetFlagBits HF, NF
+;SZ503P0
+SetFlagBits F5, F3
 ret
 
 Inst_RRD ENDP
@@ -803,6 +924,8 @@ GetBitMask x_cx, ZF
 and ah, cl
 shl ah, SF-ZF
 or RegF, ah
+;*Z513*0-
+SetFlagBits F5, F3
 ret
 
 Inst_BIT ENDP
